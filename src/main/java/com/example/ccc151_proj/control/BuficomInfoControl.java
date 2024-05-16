@@ -39,6 +39,12 @@ public class BuficomInfoControl {
     @FXML
     private ImageView org_image;
     @FXML
+    private ImageView transac_img;
+    @FXML
+    private ImageView verify_img;
+    @FXML
+    private ImageView rec_img;
+    @FXML
     private Button verify_payments_button;
     @FXML
     private Button transaction_history_button;
@@ -61,7 +67,7 @@ public class BuficomInfoControl {
 
         // just use this default photo because we don't have enough time to implement
         // changing of profile. Bitaw kapoy na :<<
-        File file = new File("src/src/default-org-logo.jpg");
+        File file = new File("src/main/resources/Image/profile (1).png");
         Image image = new Image(file.toURI().toString());
         org_image.setImage(image);
 
@@ -80,11 +86,29 @@ public class BuficomInfoControl {
      */
     @FXML
     private void verify_payments_clicked() {
-        verify_payments_button.setDisable(true);
+        verify_payments_button.setDisable(false);
         transaction_history_button.setDisable(false);
         students_records_button.setDisable(false);
+
+        verify_payments_button.setStyle("-fx-background-color: #590004; -fx-opacity: 1; -fx-text-fill: white; -fx-background-radius: 10px; -fx-border-radius: 10px; -fx-alignment: center_left;");
+        transaction_history_button.setStyle("-fx-background-color: transparent; -fx-opacity: 0.5; -fx-text-fill: black; -fx-background-radius: 10px; -fx-border-radius: 10px; -fx-alignment: center_left;");
+        students_records_button.setStyle("-fx-background-color: transparent; -fx-opacity: 0.5; -fx-text-fill: black; -fx-background-radius: 10px; -fx-border-radius: 10px; -fx-alignment: center_left;");
+
+        File file = new File("src/main/resources/Image/bill.png");
+        Image image = new Image(file.toURI().toString());
+        transac_img.setImage(image);
+
+        File file2 = new File("src/main/resources/Image/document.png");
+        Image image2 = new Image(file2.toURI().toString());
+        rec_img.setImage(image2);
+
+        File file3 = new File("src/main/resources/Image/document (1).png");
+        Image image3 = new Image(file3.toURI().toString());
+        verify_img.setImage(image3);
+
         ObservableList<Node> children = parent.getChildren();
         parent.getChildren().remove(children.get(1));
+
         try {
             FXMLLoader dashboard_loader = new FXMLLoader(
                     Main.class.getResource("BUFICOM-FRAMES/verify-payments.fxml"));
@@ -103,8 +127,25 @@ public class BuficomInfoControl {
     @FXML
     private void transaction_history_clicked() {
         verify_payments_button.setDisable(false);
-        transaction_history_button.setDisable(true);
+        transaction_history_button.setDisable(false);
         students_records_button.setDisable(false);
+
+        transaction_history_button.setStyle("-fx-background-color: #590004; -fx-opacity: 1; -fx-text-fill: white; -fx-background-radius: 10px; -fx-border-radius: 10px; -fx-alignment: center_left;");
+        students_records_button.setStyle("-fx-background-color: transparent; -fx-opacity: 0.5; -fx-text-fill: black; -fx-background-radius: 10px; -fx-border-radius: 10px; -fx-alignment: center_left;");
+        verify_payments_button.setStyle("-fx-background-color: transparent; -fx-opacity: 0.5; -fx-text-fill: black; -fx-background-radius: 10px; -fx-border-radius: 10px; -fx-alignment: center_left;");
+
+        File file = new File("src/main/resources/Image/bill (1).png");
+        Image image = new Image(file.toURI().toString());
+        transac_img.setImage(image);
+
+        File file2 = new File("src/main/resources/Image/document.png");
+        Image image2 = new Image(file2.toURI().toString());
+        rec_img.setImage(image2);
+
+        File file3 = new File("src/main/resources/Image/document.png");
+        Image image3 = new Image(file3.toURI().toString());
+        verify_img.setImage(image3);
+
         ObservableList<Node> children = parent.getChildren();
         parent.getChildren().remove(children.get(1));
         try {
@@ -126,9 +167,28 @@ public class BuficomInfoControl {
     private void students_records_clicked() {
         verify_payments_button.setDisable(false);
         transaction_history_button.setDisable(false);
-        students_records_button.setDisable(true);
+        students_records_button.setDisable(false);
+
+        students_records_button.setStyle("-fx-background-color: #590004; -fx-opacity: 1; -fx-text-fill: white; -fx-background-radius: 10px; -fx-border-radius: 10px; -fx-alignment: center_left;");
+        transaction_history_button.setStyle("-fx-background-color: transparent; -fx-opacity: 0.5; -fx-text-fill: black; -fx-background-radius: 10px; -fx-border-radius: 10px; -fx-alignment: center_left;");
+        verify_payments_button.setStyle("-fx-background-color: transparent; -fx-opacity: 0.5; -fx-text-fill: black; -fx-background-radius: 10px; -fx-border-radius: 10px; -fx-alignment: center_left;");
+
+        File file = new File("src/main/resources/Image/bill.png");
+        Image image = new Image(file.toURI().toString());
+        transac_img.setImage(image);
+
+        File file2 = new File("src/main/resources/Image/document (1).png");
+        Image image2 = new Image(file2.toURI().toString());
+        rec_img.setImage(image2);
+
+        File file3 = new File("src/main/resources/Image/document.png");
+        Image image3 = new Image(file3.toURI().toString());
+        verify_img.setImage(image3);
+
         ObservableList<Node> children = parent.getChildren();
         parent.getChildren().remove(children.get(1));
+
+
         try {
             FXMLLoader dashboard_loader = new FXMLLoader(
                     Main.class.getResource("BUFICOM-FRAMES/students-records.fxml"));
@@ -148,7 +208,6 @@ public class BuficomInfoControl {
     private void edit_contribution_button_clicked() {
         try {
             Stage add_contribution_stage = new Stage();
-            add_contribution_stage.getIcons().add(new Image(new File("src/src/app-logo.jpg").toURI().toString()));
             add_contribution_stage.setResizable(false);
 
             add_contribution_stage.initModality(Modality.APPLICATION_MODAL);

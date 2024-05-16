@@ -17,7 +17,6 @@ import javafx.scene.image.ImageView;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-import java.io.File;
 import java.io.InputStream;
 import java.sql.*;
 
@@ -74,8 +73,8 @@ public class ReviewTransactionControl {
             String payment_info_query = "SELECT `id_number`, `first_name`, `middle_name`, `last_name`, `suffix_name`, `transaction_id`, `transaction_datetime`, `amount`, `payment_mode`, `payer_receipt`, `status`, `transaction_message`\n"
                     + "FROM `pays` AS p LEFT JOIN `contributions` AS c ON p.`contribution_code` = c.`contribution_code`\n"
                     + "LEFT JOIN `students` AS s ON p.`payer_id` = s.`id_number` \n"
-                    + "WHERE c.`contribution_code` = '" + contribution_code + "'\n"
-                    + "AND p.`payer_id` = '" + payer_id_number + "'\n"
+                    + "WHERE c.`contribution_code` = \'" + contribution_code + "\'\n"
+                    + "AND p.`payer_id` = \'" + payer_id_number + "\'\n"
                     + "ORDER BY `transaction_id` DESC;";
             PreparedStatement get_payment_info = connect.prepareStatement(payment_info_query);
             ResultSet result = get_payment_info.executeQuery();
@@ -102,8 +101,8 @@ public class ReviewTransactionControl {
                 receipt_link.setOnAction(e -> {
                     viewReceipt(receipt_image);
                 });
+                transaction_status.setText(result.getString("status"));
             }
-            transaction_status.setText(result.getString("status"));
             // display the transaction comments if there is any
             String transaction_message = result.getString("transaction_message");
             if (!result.wasNull())
@@ -139,7 +138,6 @@ public class ReviewTransactionControl {
             Scene scene = new Scene(root);
             receipt_stage.setTitle("Payment Receipt.");
             receipt_stage.setScene(scene);
-            receipt_stage.getIcons().add(new Image(new File("src/src/app-logo.jpg").toURI().toString()));
             receipt_stage.setResizable(false);
             receipt_stage.show();
         } catch (SQLException ex) {

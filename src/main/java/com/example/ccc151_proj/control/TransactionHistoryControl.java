@@ -11,11 +11,9 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.image.Image;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -71,8 +69,8 @@ public class TransactionHistoryControl {
     private void setupContributions(){
         try {
             String contribution_code_query = "SELECT `contribution_code` FROM `contributions` "
-                    + "WHERE `collecting_org_code` = '" + this.org_code
-                    + "' AND `academic_year` = '" + this.academic_year + "';";
+                    + "WHERE `collecting_org_code` = \'" + this.org_code
+                    + "\' AND `academic_year` = \'" + this.academic_year + "\';";
             PreparedStatement get_contribution_code = connect.prepareStatement(contribution_code_query);
             ResultSet result = get_contribution_code.executeQuery();
             ObservableList<String> contribution_list = FXCollections.observableArrayList();
@@ -97,9 +95,8 @@ public class TransactionHistoryControl {
         try {
             String unverified_payments_query = "SELECT `id_number`, `first_name`, `middle_name`, `last_name`, `suffix_name`, `status`, `transaction_id`\n"
                     + "FROM `pays` AS p LEFT JOIN `students` AS s ON p.`payer_id` = s.`id_number`\n"
-                    + "WHERE p.`contribution_code` = '" + contribution_code_combobox.getSelectionModel().getSelectedItem() + "' "
-                    + "AND (p.`status` = 'Accepted' OR p.`status` = 'Rejected') "
-                    + "ORDER BY `transaction_id` DESC;";
+                    + "WHERE p.`contribution_code` = \'" + contribution_code_combobox.getSelectionModel().getSelectedItem() + "\' "
+                    + "AND (p.`status` = \'Accepted\' OR p.`status` = \'Rejected\');";
             PreparedStatement get_unverified_payments = connect.prepareStatement(unverified_payments_query);
             ResultSet result = get_unverified_payments.executeQuery();
             while (result.next()) {
@@ -152,7 +149,7 @@ public class TransactionHistoryControl {
         try {
             String program_code_query = "SELECT DISTINCT `program_code` \n" +
                     "FROM `members` AS m LEFT JOIN `students` AS s ON m.`member_id` = s.`id_number`\n" +
-                    "WHERE m.`organization_code` = '" + org_code + "';";
+                    "WHERE m.`organization_code` = \'" + org_code + "\';";
             PreparedStatement get_program_code = connect.prepareStatement(program_code_query);
             ResultSet result = get_program_code.executeQuery();
             while (result.next()) {
@@ -186,11 +183,10 @@ public class TransactionHistoryControl {
             try {
                 String unverified_payments_query = "SELECT `id_number`, `first_name`, `middle_name`, `last_name`, `suffix_name`, `status`, `transaction_id`\n"
                         + "FROM `pays` AS p LEFT JOIN `students` AS s ON p.`payer_id` = s.`id_number`\n"
-                        + "WHERE s.`program_code` = '" + program_code_combobox.getSelectionModel().getSelectedItem() + "' "
-                        + "AND s.`year_level` = '" + year_level_combobox.getSelectionModel().getSelectedItem() + "' "
-                        + "AND p.`contribution_code` = '" + contribution_code_combobox.getSelectionModel().getSelectedItem() + "' "
-                        + "AND (p.`status` = 'Accepted' OR p.`status` = 'Rejected') "
-                        + "ORDER BY `transaction_id` DESC;";
+                        + "WHERE s.`program_code` = \'" + program_code_combobox.getSelectionModel().getSelectedItem() + "\' "
+                        + "AND s.`year_level` = \'" + year_level_combobox.getSelectionModel().getSelectedItem() + "\' "
+                        + "AND p.`contribution_code` = \'" + contribution_code_combobox.getSelectionModel().getSelectedItem() + "\' "
+                        + "AND (p.`status` = \'Accepted\' OR p.`status` = \'Rejected\');";
                 PreparedStatement get_unverified_payments = connect.prepareStatement(unverified_payments_query);
                 ResultSet result = get_unverified_payments.executeQuery();
                 while (result.next()) {
@@ -229,10 +225,9 @@ public class TransactionHistoryControl {
             try {
                 String search_id_query = "SELECT `id_number`, `first_name`, `middle_name`, `last_name`, `suffix_name`, `status`, `transaction_id`\n"
                         + "FROM `pays` AS p LEFT JOIN `students` AS s ON p.`payer_id` = s.`id_number`\n"
-                        + "WHERE p.`payer_id` LIKE '%" + search_id_textfield.getText() + "%' "
-                        + "AND p.`contribution_code` = '" + contribution_code_combobox.getSelectionModel().getSelectedItem() + "'\n"
-                        + "AND (p.`status` = 'Accepted' OR p.`status` = 'Rejected') "
-                        + "ORDER BY `transaction_id` DESC;";
+                        + "WHERE p.`payer_id` LIKE \'%" + search_id_textfield.getText() + "%\' "
+                        + "AND p.`contribution_code` = \'" + contribution_code_combobox.getSelectionModel().getSelectedItem() + "\'\n"
+                        + "AND (p.`status` = \'Accepted\' OR p.`status` = \'Rejected\');";
                 PreparedStatement get_student_id = connect.prepareStatement(search_id_query);
                 ResultSet result = get_student_id.executeQuery();
                 while (result.next()) {
@@ -276,19 +271,17 @@ public class TransactionHistoryControl {
      * Display and facilitates the verify transaction form.
      */
     @FXML
-    private void review_contribution() {
+    private void verify_contribution() {
         UnverifiedPayment payment = unverified_payments_table.getSelectionModel().getSelectedItem();
         if (payment != null) {
             try {
                 Stage transaction_stage = new Stage();
-                transaction_stage.getIcons().add(new Image(new File("src/src/app-logo.jpg").toURI().toString()));
-                transaction_stage.setResizable(false);
                 transaction_stage.initModality(Modality.APPLICATION_MODAL);
                 FXMLLoader verify_form_loader = new FXMLLoader(
-                        Main.class.getResource("review-transaction-form.fxml"));
+                        Main.class.getResource("BUFICOM-FRAMES/verify-transaction-form.fxml"));
                 Parent transaction_parent = verify_form_loader.load();
-                ReviewTransactionControl transaction_process = verify_form_loader.getController();
-                transaction_process.initialize(payment.getId_number(), contribution_code_combobox.getSelectionModel().getSelectedItem());
+                VerifyTransactionControl transaction_process = verify_form_loader.getController();
+                transaction_process.initialize(payment);
 
                 Scene transaction_scene = new Scene(transaction_parent);
                 transaction_stage.setTitle("Verify Payment");

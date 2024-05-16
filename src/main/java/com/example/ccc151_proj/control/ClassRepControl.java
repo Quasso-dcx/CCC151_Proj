@@ -42,6 +42,10 @@ public class ClassRepControl {
     @FXML
     private ImageView user_image;
     @FXML
+    private ImageView ec_img;
+    @FXML
+    private ImageView soc_img;
+    @FXML
     private TextField user_name;
     @FXML
     private TextField user_id;
@@ -110,7 +114,7 @@ public class ClassRepControl {
 
         // just use this default photo because we don't have enough time to implement
         // changing of profile. Bitaw kapoy na :<<
-        File file = new File("src/src/default-user-image.jpg");
+        File file = new File("C:/JavaFX/javafx-sdk-22.0.1/CCC151_Proj/src/main/resources/Image/profile (1).png");
         Image image = new Image(file.toURI().toString());
         user_image.setImage(image);
 
@@ -371,10 +375,21 @@ public class ClassRepControl {
      */
     @FXML
     private void ec_button_clicked(ActionEvent event) {
-        ec_button.setDisable(true);
+        ec_button.setDisable(false);
         society_button.setDisable(false);
         resetSearch();
         setupData(user.getEc_code());
+
+        File file = new File("C:/JavaFX/javafx-sdk-22.0.1/CCC151_Proj/src/main/resources/Image/businessman (1).png");
+        Image image = new Image(file.toURI().toString());
+        ec_img.setImage(image);
+
+        File file2 = new File("C:/JavaFX/javafx-sdk-22.0.1/CCC151_Proj/src/main/resources/Image/group (1).png");
+        Image image2 = new Image(file2.toURI().toString());
+        soc_img.setImage(image2);
+
+        ec_button.setStyle("-fx-background-color: #590004; -fx-opacity: 1; -fx-text-fill: white; -fx-background-radius: 10px; -fx-border-radius: 10px; -fx-alignment: center_left;");
+        society_button.setStyle("-fx-background-color: transparent; -fx-opacity: 0.5; -fx-text-fill: black; -fx-background-radius: 10px; -fx-border-radius: 10px; -fx-alignment: center_left;");
     }
 
     /**
@@ -385,9 +400,20 @@ public class ClassRepControl {
     @FXML
     private void society_button_clicked(ActionEvent event) {
         ec_button.setDisable(false);
-        society_button.setDisable(true);
+        society_button.setDisable(false);
         resetSearch();
         setupData(user.getSociety_code());
+
+        File file = new File("C:/JavaFX/javafx-sdk-22.0.1/CCC151_Proj/src/main/resources/Image/group (2).png");
+        Image image = new Image(file.toURI().toString());
+        soc_img.setImage(image);
+
+        File file2 = new File("C:/JavaFX/javafx-sdk-22.0.1/CCC151_Proj/src/main/resources/Image/businessman.png");
+        Image image2 = new Image(file2.toURI().toString());
+        ec_img.setImage(image2);
+
+        society_button.setStyle("-fx-background-color: #590004; -fx-opacity: 1; -fx-text-fill: white; -fx-background-radius: 10px; -fx-border-radius: 10px; -fx-alignment: center_left;");
+        ec_button.setStyle("-fx-background-color: transparent; -fx-opacity: 0.5; -fx-text-fill: black; -fx-background-radius: 10px; -fx-border-radius: 10px; -fx-alignment: center_left;");
     }
 
     /**
@@ -416,7 +442,6 @@ public class ClassRepControl {
                 non_selected.showAndWait();
             } else {
                 Stage transaction_stage = new Stage();
-                transaction_stage.getIcons().add(new Image(new File("src/src/app-logo.jpg").toURI().toString()));
                 transaction_stage.setResizable(false);
                 transaction_stage.initModality(Modality.APPLICATION_MODAL);
 
@@ -450,7 +475,6 @@ public class ClassRepControl {
         if (contribution_data_table.getItems().get(0).getContribution_amount() > 0) {
             StudentPaymentInfo payer = student_data_table.getSelectionModel().getSelectedItem();
             Stage transaction_stage = new Stage();
-            transaction_stage.getIcons().add(new Image(new File("src/src/app-logo.jpg").toURI().toString()));
             transaction_stage.setResizable(false);
             transaction_stage.initModality(Modality.APPLICATION_MODAL);
 
@@ -499,7 +523,6 @@ public class ClassRepControl {
                 non_selected.showAndWait();
             } else {
                 Stage transaction_stage = new Stage();
-                transaction_stage.getIcons().add(new Image(new File("src/src/app-logo.jpg").toURI().toString()));
                 transaction_stage.setResizable(false);
                 transaction_stage.initModality(Modality.APPLICATION_MODAL);
 
@@ -533,7 +556,6 @@ public class ClassRepControl {
         if (contribution_data_table.getItems().get(1).getContribution_amount() > 0) {
             StudentPaymentInfo payer = student_data_table.getSelectionModel().getSelectedItem();
             Stage transaction_stage = new Stage();
-            transaction_stage.getIcons().add(new Image(new File("src/src/app-logo.jpg").toURI().toString()));
             transaction_stage.setResizable(false);
             transaction_stage.initModality(Modality.APPLICATION_MODAL);
 

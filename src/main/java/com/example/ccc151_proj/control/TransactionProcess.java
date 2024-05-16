@@ -4,7 +4,10 @@ import com.example.ccc151_proj.model.DataManager;
 import com.example.ccc151_proj.model.StudentPaymentInfo;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -22,6 +25,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.lang.reflect.Type;
 import java.net.URL;
 import java.sql.*;
 import java.util.ResourceBundle;
@@ -30,7 +34,7 @@ import java.util.ResourceBundle;
  * For recording transactions.
  */
 public class TransactionProcess {
-    private static Connection connect;
+    private final Connection connect = DataManager.getConnect();
     @FXML
     private URL location;
     @FXML
@@ -70,7 +74,6 @@ public class TransactionProcess {
      * @param contribution_code
      */
     public void initialize(String contribution_code) {
-        connect = DataManager.getConnect();
         // get the information of the contribution from its code
         this.contribution_code = contribution_code;
         String[] contribution_details = this.contribution_code.split("_");
@@ -92,7 +95,7 @@ public class TransactionProcess {
         // get the amount
         try {
             Connection connect = DataManager.getConnect();
-            String amount_query = "SELECT `amount` FROM `contributions` WHERE `contribution_code` = '" + this.contribution_code + "';";
+            String amount_query = "SELECT `amount` FROM `contributions` WHERE `contribution_code` = \'" + this.contribution_code + "\';";
             PreparedStatement get_amount = connect.prepareStatement(amount_query);
             ResultSet result_id = get_amount.executeQuery();
             result_id.next();
@@ -134,62 +137,54 @@ public class TransactionProcess {
      */
     @FXML
     private void recordTransaction() {
-        if (!transaction_payment_mode.getValue().equals("Cash") && receipt_link.getText().equals("No File Chosen")){
-            Alert no_receipt = new Alert(Alert.AlertType.ERROR);
-            no_receipt.setTitle("Receipt Required.");
-            no_receipt.setHeaderText(null);
-            no_receipt.setContentText("Please add receipt.");
-            no_receipt.showAndWait();
-        } else {
-            try {
-                String update_payer_status_query = "INSERT INTO `pays` (`contribution_code`, `payer_id`, `payment_mode`, `payer_receipt`, `status`)\n" +
-                        "VALUES (?, ?, ?, ?, 'Pending');";
-                PreparedStatement insert_payer_status = connect.prepareStatement(update_payer_status_query);
-                insert_payer_status.setString(1, contribution_code);
-                insert_payer_status.setString(2, payer.getId_number());
-                insert_payer_status.setString(3, transaction_payment_mode.getValue());
-                if (transaction_payment_mode.getValue().equals("Cash")){
-                    insert_payer_status.setNull(4, Types.NULL);
-                } else {
-                    try {
-                        File receipt_image = new File(receipt_link.getText());
-                        FileInputStream receipt_image_fin = new FileInputStream(receipt_image);
-                        insert_payer_status.setBinaryStream(4, receipt_image_fin, (int) receipt_image.length());
-                    } catch (FileNotFoundException e) {
-                        throw new RuntimeException(e);
-                    }
+        try {
+            String update_payer_status_query = "INSERT INTO `pays` (`contribution_code`, `payer_id`, `payment_mode`, `payer_receipt`, `status`)\n" +
+                    "VALUES (?, ?, ?, ?, \'Pending\');";
+            PreparedStatement insert_payer_status = connect.prepareStatement(update_payer_status_query);
+            insert_payer_status.setString(1, contribution_code);
+            insert_payer_status.setString(2, payer.getId_number());
+            insert_payer_status.setString(3, transaction_payment_mode.getValue());
+            if (transaction_payment_mode.getValue().equals("Cash")){
+                insert_payer_status.setNull(4, Types.NULL);
+            } else {
+                try {
+                    File receipt_image = new File(receipt_link.getText());
+                    FileInputStream receipt_image_fin = new FileInputStream(receipt_image);
+                    insert_payer_status.setBinaryStream(4, receipt_image_fin, (int) receipt_image.length());
+                } catch (FileNotFoundException e) {
+                    throw new RuntimeException(e);
                 }
-
-                insert_payer_status.executeUpdate();
-                insert_payer_status.close();
-
-                // for confirmation
-                String transaction_id_query = "SELECT `transaction_id` FROM `pays` WHERE `contribution_code` = '" + contribution_code
-                        + "' AND `payer_id` = '" + payer.getId_number() + "' ORDER BY `transaction_id` DESC;";
-                PreparedStatement get_transaction_id = connect.prepareStatement(transaction_id_query);
-                ResultSet result_id = get_transaction_id.executeQuery();
-                result_id.next();
-                String transaction_id = result_id.getString("transaction_id");
-                result_id.close();
-
-                Alert success_transaction = new Alert(Alert.AlertType.INFORMATION);
-                success_transaction.setTitle("Transaction Successful");
-                success_transaction.setHeaderText(null);
-                success_transaction.setContentText("Transaction Successful (with Transaction ID = " + transaction_id + ") for Student " + payer.getId_number() +
-                        ". Please wait for verification from the BUFICOM Officers. Thank you.");
-                success_transaction.showAndWait();
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
             }
 
-            if (semester.equals("1"))
-                payer.setFirst_sem_status("Pending");
-            else
-                payer.setSecond_sem_status("Pending");
+            insert_payer_status.executeUpdate();
+            insert_payer_status.close();
 
-            //close the window
-            ((Stage) transaction_scene.getScene().getWindow()).close();
+            // for confirmation
+            String transaction_id_query = "SELECT `transaction_id` FROM `pays` WHERE `contribution_code` = \'" + contribution_code
+                    + "\' AND `payer_id` = \'" + payer.getId_number() + "\' ORDER BY `transaction_id` DESC;";
+            PreparedStatement get_transaction_id = connect.prepareStatement(transaction_id_query);
+            ResultSet result_id = get_transaction_id.executeQuery();
+            result_id.next();
+            String transaction_id = result_id.getString("transaction_id");
+            result_id.close();
+
+            Alert success_transaction = new Alert(Alert.AlertType.INFORMATION);
+            success_transaction.setTitle("Transaction Successful");
+            success_transaction.setHeaderText(null);
+            success_transaction.setContentText("Transaction Successful (with Transaction ID = " + transaction_id + ") for Student " + payer.getId_number() +
+                    ". Please wait for verification from the BUFICOM Officers. Thank you.");
+            success_transaction.showAndWait();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
+
+        if (semester.equals("1"))
+            payer.setFirst_sem_status("Pending");
+        else
+            payer.setSecond_sem_status("Pending");
+
+        //close the window
+        ((Stage) transaction_scene.getScene().getWindow()).close();
     }
 
     /**
@@ -206,7 +201,7 @@ public class TransactionProcess {
             String[] folder_paths = path.split("/");
             StringBuilder folder_path = new StringBuilder();
             for (int folder = 0; folder < folder_paths.length - 1; folder++) {
-                folder_path.append(folder_paths[folder]).append('\\');
+                folder_path.append(folder_paths[folder]).append("\\");
             }
             fileChooser.setInitialDirectory(new File(folder_path.toString()));
         }
@@ -255,8 +250,6 @@ public class TransactionProcess {
     private void receiptViewer() {
         if (!receipt_link.getText().equals("No File Chosen")) {
             Stage receipt_stage = new Stage();
-            receipt_stage.getIcons().add(new Image(new File("src/src/app-logo.jpg").toURI().toString()));
-            receipt_stage.setResizable(false);
             receipt_stage.initModality(Modality.APPLICATION_MODAL);
             try {
                 InputStream stream = new FileInputStream(receipt_link.getText());
@@ -276,6 +269,7 @@ public class TransactionProcess {
                 Scene scene = new Scene(root);
                 receipt_stage.setTitle("Payment Receipt.");
                 receipt_stage.setScene(scene);
+                receipt_stage.setResizable(false);
                 receipt_stage.show();
             } catch (FileNotFoundException e) {
                 Alert file_not_found = new Alert(Alert.AlertType.INFORMATION);

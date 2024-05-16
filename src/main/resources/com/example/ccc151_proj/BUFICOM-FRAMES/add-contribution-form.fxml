@@ -8,11 +8,23 @@
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.shape.Line?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.ccc151_proj.control.AddContributionControl">
+<AnchorPane prefHeight="584.0" prefWidth="583.0" stylesheets="@dashboard.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.ccc151_proj.control.AddContributionControl">
    <children>
-      <TableView fx:id="contribution_data_table" focusTraversable="false" layoutX="31.0" layoutY="45.0" pickOnBounds="false" prefHeight="75.0" prefWidth="539.0" style="-fx-background-color: #ffffff;">
+      <Label layoutX="20.0" layoutY="241.0" opacity="0.5" prefHeight="1.0" prefWidth="133.0" text="Organization Code" />
+      <Label layoutX="21.0" layoutY="300.0" opacity="0.5" prefHeight="1.0" prefWidth="133.0" text="Academic Year" />
+      <Label layoutX="21.0" layoutY="363.0" opacity="0.5" prefHeight="7.0" prefWidth="133.0" text="Semester" />
+      <Label layoutX="22.0" layoutY="427.0" opacity="0.5" prefHeight="1.0" prefWidth="133.0" text="Amount" />
+      <TextField fx:id="organization_code_textfield" editable="false" layoutX="20.0" layoutY="258.0" prefHeight="34.0" prefWidth="539.0" style="-fx-background-color: white; -fx-border-color: #e6e6e6;" />
+      <TextField fx:id="academic_year_textfield" editable="false" layoutX="20.0" layoutY="317.0" prefHeight="34.0" prefWidth="539.0" style="-fx-background-color: white; -fx-border-color: #e6e6e6;" />
+      <TextField fx:id="amount_textfield" layoutX="21.0" layoutY="444.0" prefHeight="34.0" prefWidth="539.0" style="-fx-background-color: white; -fx-border-color: #e6e6e6;" />
+      <ComboBox fx:id="semester_combobox" layoutX="21.0" layoutY="380.0" prefHeight="34.0" prefWidth="539.0" style="-fx-background-color: white; -fx-border-color: #e6e6e6;" />
+      <Button fx:id="edit_contribution_button" disable="true" layoutX="306.0" layoutY="502.0" mnemonicParsing="false" onAction="#edit_contribution_button_clicked" prefHeight="45.0" prefWidth="253.0" style="-fx-background-color: #590004;" text="EDIT CONTRIBUTION" textFill="WHITE" />
+      <Button fx:id="clear_selection_button" layoutX="21.0" layoutY="502.0" mnemonicParsing="false" onAction="#clear_selection_button_clicked" prefHeight="45.0" prefWidth="253.0" style="-fx-background-color: #590004;" text="CLEAR SELECTION" textFill="WHITE" />
+      <TableView fx:id="contribution_data_table" focusTraversable="false" layoutX="22.0" layoutY="106.0" pickOnBounds="false" prefHeight="66.0" prefWidth="539.0" style="-fx-background-color: #ffffff;">
          <columns>
             <TableColumn fx:id="code_column" editable="false" prefWidth="75.0" sortable="false" text="Contribution Code" />
             <TableColumn fx:id="academic_year_column" editable="false" prefWidth="75.0" sortable="false" text="Academic Year" />
@@ -26,31 +38,13 @@
             <Cursor fx:constant="DEFAULT" />
          </cursor>
       </TableView>
-      <Label layoutX="14.0" layoutY="144.0" prefHeight="21.0" prefWidth="133.0" text="Organization Code:">
+      <Pane prefHeight="47.0" prefWidth="583.0" style="-fx-background-color: #590004;" />
+      <Label layoutX="22.0" layoutY="72.0" prefHeight="27.0" prefWidth="539.0" style="-fx-background-color: white; -fx-background-radius: 10px; -fx-border-radius: 10px;" text="     Contribution Code              Academic Year                      Semester                           Amount" />
+      <Label layoutX="21.0" layoutY="191.0" opacity="0.8" prefHeight="37.0" prefWidth="170.0" text="Transaction Details">
          <font>
             <Font size="15.0" />
          </font>
       </Label>
-      <Label layoutX="11.0" layoutY="179.0" prefHeight="21.0" prefWidth="133.0" text="Academic Year:">
-         <font>
-            <Font size="15.0" />
-         </font>
-      </Label>
-      <Label layoutX="14.0" layoutY="216.0" prefHeight="21.0" prefWidth="133.0" text="Semester:">
-         <font>
-            <Font size="15.0" />
-         </font>
-      </Label>
-      <Label layoutX="14.0" layoutY="254.0" prefHeight="21.0" prefWidth="133.0" text="Amount:">
-         <font>
-            <Font size="15.0" />
-         </font>
-      </Label>
-      <TextField fx:id="organization_code_textfield" editable="false" layoutX="222.0" layoutY="138.0" prefHeight="34.0" prefWidth="177.0" />
-      <TextField fx:id="academic_year_textfield" editable="false" layoutX="222.0" layoutY="173.0" prefHeight="34.0" prefWidth="177.0" />
-      <TextField fx:id="amount_textfield" layoutX="222.0" layoutY="248.0" prefHeight="34.0" prefWidth="177.0" />
-      <ComboBox fx:id="semester_combobox" layoutX="222.0" layoutY="210.0" prefHeight="34.0" prefWidth="177.0" />
-      <Button fx:id="edit_contribution_button" disable="true" layoutX="319.0" layoutY="326.0" mnemonicParsing="false" onAction="#edit_contribution_button_clicked" text="Edit Contribution" />
-      <Button fx:id="clear_selection_button" layoutX="196.0" layoutY="326.0" mnemonicParsing="false" onAction="#clear_selection_button_clicked" text="Clear Selection" />
+      <Line endX="292.0" layoutX="269.0" layoutY="210.0" opacity="0.5" startX="-112.0" />
    </children>
 </AnchorPane>
