@@ -199,6 +199,9 @@ public class TransactionHistoryControl {
     private void search_block_button_clicked() {
         if (!program_code_combobox.getValue().equals("--Select Program--")
                 && !year_level_combobox.getValue().equals("--Select Year--")) {
+            displayPayments();
+            search_id_textfield.clear();
+
             ObservableList<UnverifiedPayment> unverified_list = FXCollections.observableArrayList();
             try {
                 String unverified_payments_query = "SELECT `id_number`, `first_name`, `middle_name`, `last_name`, `suffix_name`, `status`, `transaction_id`\n"
@@ -242,6 +245,9 @@ public class TransactionHistoryControl {
     @FXML
     private void search_id_button_clicked() {
         if (!search_id_textfield.getText().isEmpty()) {
+            displayPayments();
+            program_code_combobox.getSelectionModel().selectFirst();
+            year_level_combobox.getSelectionModel().selectFirst();
             ObservableList<UnverifiedPayment> payer_with_id_list = FXCollections.observableArrayList();
             try {
                 String search_id_query = "SELECT `id_number`, `first_name`, `middle_name`, `last_name`, `suffix_name`, `status`, `transaction_id`\n"

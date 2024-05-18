@@ -14,6 +14,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Optional;
 
 public class EditContributionControl {
     private static Connection connect;
@@ -123,18 +124,27 @@ public class EditContributionControl {
     @FXML
     private void edit_contribution_button_clicked() {
         if (!amount_textfield.getText().isEmpty()){
-            try {
-                String edit_contribution_query = "UPDATE `contributions` SET `semester` = ?, `amount` = ? WHERE `contribution_code` = ?;";
-                PreparedStatement edit_contribution = connect.prepareStatement(edit_contribution_query);
-                edit_contribution.setString(1, semester_combobox.getValue());
-                edit_contribution.setInt(2, Integer.parseInt(amount_textfield.getText()));
-                edit_contribution.setString(3, contribution_data_table.getSelectionModel().getSelectedItem().getContribution_code());
-                edit_contribution.executeUpdate();
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
-            initialize(this.org_code);
-            clear_selection_button_clicked();
+            Alert edit_confirmation = new Alert(Alert.AlertType.CONFIRMATION);
+            edit_confirmation.setTitle("Edit Confirmation");
+            edit_confirmation.setHeaderText("This will change the contribution amount. Any payments accepted before this change will not be affected.");
+            edit_confirmation.setContentText("Are you sure?");
+            Optional<ButtonType> confirm = edit_confirmation.showAndWait();
+            confirm.ifPresent(choice -> {
+                if (confirm.get() == ButtonType.OK){
+                    try {
+                        String edit_contribution_query = "UPDATE `contributions` SET `semester` = ?, `amount` = ? WHERE `contribution_code` = ?;";
+                        PreparedStatement edit_contribution = connect.prepareStatement(edit_contribution_query);
+                        edit_contribution.setString(1, semester_combobox.getValue());
+                        edit_contribution.setInt(2, Integer.parseInt(amount_textfield.getText()));
+                        edit_contribution.setString(3, contribution_data_table.getSelectionModel().getSelectedItem().getContribution_code());
+                        edit_contribution.executeUpdate();
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                    }
+                    initialize(this.org_code);
+                    clear_selection_button_clicked();
+                }
+            });
         } else {
             Border error_border = new Border(new BorderStroke(Color.RED, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT));
             amount_textfield.setBorder(error_border);
