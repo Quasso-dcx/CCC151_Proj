@@ -69,7 +69,7 @@ public class TransactionHistoryControl {
     }
 
     /**
-     * Enable the search button when an input is provided in the textfield.
+     * Enable the search button when an input is provided in the textField.
      */
     private void searchSetup(){
         search_id_textfield.textProperty().addListener((ov, t, textField) -> {
@@ -87,7 +87,8 @@ public class TransactionHistoryControl {
      */
     private void setupContributions(){
         try {
-            String contribution_code_query = "SELECT `contribution_code` FROM `contributions` "
+            String contribution_code_query = "SELECT `contribution_code` "
+                    + "FROM `contributions` "
                     + "WHERE `collecting_org_code` = '" + this.org_code + "' "
                     + "AND `academic_year` = '" + this.academic_year + "';";
             PreparedStatement get_contribution_code = connect.prepareStatement(contribution_code_query);
@@ -101,6 +102,7 @@ public class TransactionHistoryControl {
             contribution_code_combobox.setOnAction(e -> {
                 refresh_button_clicked();
             });
+            get_contribution_code.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -112,8 +114,8 @@ public class TransactionHistoryControl {
     private void displayPayments() {
         ObservableList<UnverifiedPayment> unverified_list = FXCollections.observableArrayList();
         try {
-            String unverified_payments_query = "SELECT `id_number`, `first_name`, `middle_name`, `last_name`, `suffix_name`, `status`, `transaction_id`\n"
-                    + "FROM `pays` AS p LEFT JOIN `students` AS s ON p.`payer_id` = s.`id_number`\n"
+            String unverified_payments_query = "SELECT `id_number`, `first_name`, `middle_name`, `last_name`, `suffix_name`, `status`, `transaction_id` "
+                    + "FROM `pays` AS p LEFT JOIN `students` AS s ON p.`payer_id` = s.`id_number` "
                     + "WHERE p.`contribution_code` = '" + contribution_code_combobox.getSelectionModel().getSelectedItem() + "' "
                     + "AND (p.`status` = 'Accepted' OR p.`status` = 'Rejected') "
                     + "ORDER BY `transaction_id` DESC;";
@@ -132,7 +134,7 @@ public class TransactionHistoryControl {
                         suffix_name, status, transaction_id));
             }
             setupData(unverified_list);
-            result.close();
+            get_unverified_payments.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -145,6 +147,7 @@ public class TransactionHistoryControl {
      */
     private void setupData(ObservableList<UnverifiedPayment> data) {
         unverified_payments_table.getItems().clear();
+
         id_column.setCellValueFactory(new PropertyValueFactory<>("id_number"));
         first_name_column.setCellValueFactory(new PropertyValueFactory<>("first_name"));
         middle_name_column.setCellValueFactory(new PropertyValueFactory<>("middle_name"));
@@ -157,6 +160,7 @@ public class TransactionHistoryControl {
         last_name_column.setStyle("-fx-alignment: CENTER;");
         suffix_name_column.setStyle("-fx-alignment: CENTER;");
         status_column.setStyle("-fx-alignment: CENTER;");
+
         unverified_payments_table.setItems(data);
     }
 
@@ -167,15 +171,15 @@ public class TransactionHistoryControl {
         ObservableList<String> block_list = FXCollections.observableArrayList();
         block_list.add("--Select Program--");
         try {
-            String program_code_query = "SELECT DISTINCT `program_code` \n" +
-                    "FROM `members` AS m LEFT JOIN `students` AS s ON m.`member_id` = s.`id_number`\n" +
-                    "WHERE m.`organization_code` = '" + org_code + "';";
+            String program_code_query = "SELECT DISTINCT `program_code` "
+                    + "FROM `members` AS m LEFT JOIN `students` AS s ON m.`member_id` = s.`id_number` "
+                    + "WHERE m.`organization_code` = '" + org_code + "';";
             PreparedStatement get_program_code = connect.prepareStatement(program_code_query);
             ResultSet result = get_program_code.executeQuery();
             while (result.next()) {
                 block_list.add(result.getString("program_code"));
             }
-            result.close();
+            get_program_code.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -204,8 +208,8 @@ public class TransactionHistoryControl {
 
             ObservableList<UnverifiedPayment> unverified_list = FXCollections.observableArrayList();
             try {
-                String unverified_payments_query = "SELECT `id_number`, `first_name`, `middle_name`, `last_name`, `suffix_name`, `status`, `transaction_id`\n"
-                        + "FROM `pays` AS p LEFT JOIN `students` AS s ON p.`payer_id` = s.`id_number`\n"
+                String unverified_payments_query = "SELECT `id_number`, `first_name`, `middle_name`, `last_name`, `suffix_name`, `status`, `transaction_id` "
+                        + "FROM `pays` AS p LEFT JOIN `students` AS s ON p.`payer_id` = s.`id_number` "
                         + "WHERE s.`program_code` = '" + program_code_combobox.getSelectionModel().getSelectedItem() + "' "
                         + "AND s.`year_level` = '" + year_level_combobox.getSelectionModel().getSelectedItem() + "' "
                         + "AND p.`contribution_code` = '" + contribution_code_combobox.getSelectionModel().getSelectedItem() + "' "
@@ -226,7 +230,7 @@ public class TransactionHistoryControl {
                             suffix_name, status, transaction_id));
                 }
                 setupData(unverified_list);
-                result.close();
+                get_unverified_payments.close();
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
@@ -250,10 +254,10 @@ public class TransactionHistoryControl {
             year_level_combobox.getSelectionModel().selectFirst();
             ObservableList<UnverifiedPayment> payer_with_id_list = FXCollections.observableArrayList();
             try {
-                String search_id_query = "SELECT `id_number`, `first_name`, `middle_name`, `last_name`, `suffix_name`, `status`, `transaction_id`\n"
-                        + "FROM `pays` AS p LEFT JOIN `students` AS s ON p.`payer_id` = s.`id_number`\n"
+                String search_id_query = "SELECT `id_number`, `first_name`, `middle_name`, `last_name`, `suffix_name`, `status`, `transaction_id` "
+                        + "FROM `pays` AS p LEFT JOIN `students` AS s ON p.`payer_id` = s.`id_number` "
                         + "WHERE p.`payer_id` LIKE '%" + search_id_textfield.getText() + "%' "
-                        + "AND p.`contribution_code` = '" + contribution_code_combobox.getSelectionModel().getSelectedItem() + "'\n"
+                        + "AND p.`contribution_code` = '" + contribution_code_combobox.getSelectionModel().getSelectedItem() + "' "
                         + "AND (p.`status` = 'Accepted' OR p.`status` = 'Rejected') "
                         + "ORDER BY `transaction_id` DESC;";
                 PreparedStatement get_student_id = connect.prepareStatement(search_id_query);
@@ -271,7 +275,7 @@ public class TransactionHistoryControl {
                             suffix_name, status, transaction_id));
                 }
                 setupData(payer_with_id_list);
-                result.close();
+                get_student_id.close();
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
@@ -307,6 +311,7 @@ public class TransactionHistoryControl {
                 transaction_stage.getIcons().add(new Image(new File("src/src/app-logo.jpg").toURI().toString()));
                 transaction_stage.setResizable(false);
                 transaction_stage.initModality(Modality.APPLICATION_MODAL);
+
                 FXMLLoader verify_form_loader = new FXMLLoader(
                         Main.class.getResource("review-transaction-form.fxml"));
                 Parent transaction_parent = verify_form_loader.load();
@@ -320,7 +325,6 @@ public class TransactionHistoryControl {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-            displayPayments();
         } else {
             Alert non_selected = new Alert(Alert.AlertType.ERROR);
             non_selected.setTitle("No Payment Selected");

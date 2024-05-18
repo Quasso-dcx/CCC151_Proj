@@ -3,7 +3,7 @@ package com.example.ccc151_proj.control;
 import com.example.ccc151_proj.Main;
 import com.example.ccc151_proj.model.DataManager;
 import com.example.ccc151_proj.model.UnverifiedPayment;
-import javafx.beans.binding.Bindings;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -93,9 +93,10 @@ public class VerifyPaymentsControl {
      */
     private void setupContributions(){
         try {
-            String contribution_code_query = "SELECT `contribution_code` FROM `contributions` "
-                    + "WHERE `collecting_org_code` = '" + this.org_code + "' "
-                    + "AND `academic_year` = '" + this.academic_year + "';";
+            String contribution_code_query = "SELECT `contribution_code` "
+                    + "FROM `contributions` "
+                    + "WHERE `collecting_org_code` = '" + org_code + "' "
+                    + "AND `academic_year` = '" + academic_year + "';";
             PreparedStatement get_contribution_code = connect.prepareStatement(contribution_code_query);
             ResultSet result = get_contribution_code.executeQuery();
             ObservableList<String> contribution_list = FXCollections.observableArrayList();
@@ -108,7 +109,7 @@ public class VerifyPaymentsControl {
             contribution_code_combobox.setOnAction(e -> {
                 refresh_button_clicked();
             });
-            result.close();
+            get_contribution_code.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -118,10 +119,11 @@ public class VerifyPaymentsControl {
      * Fetch and display the unverified payments.
      */
     private void displayPayments() {
+        unverified_payments_table.getItems().clear();
         ObservableList<UnverifiedPayment> unverified_list = FXCollections.observableArrayList();
         try {
-            String unverified_payments_query = "SELECT `id_number`, `first_name`, `middle_name`, `last_name`, `suffix_name`, `status`, `transaction_id`\n"
-                    + "FROM `pays` AS p LEFT JOIN `students` AS s ON p.`payer_id` = s.`id_number`\n"
+            String unverified_payments_query = "SELECT `id_number`, `first_name`, `middle_name`, `last_name`, `suffix_name`, `status`, `transaction_id` "
+                    + "FROM `pays` AS p LEFT JOIN `students` AS s ON p.`payer_id` = s.`id_number` "
                     + "WHERE p.`contribution_code` = '" + contribution_code_combobox.getSelectionModel().getSelectedItem() + "' "
                     + "AND p.`status` = 'Pending';";
             PreparedStatement get_unverified_payments = connect.prepareStatement(unverified_payments_query);
@@ -139,7 +141,7 @@ public class VerifyPaymentsControl {
                         suffix_name, status, transaction_id));
             }
             setupData(unverified_list);
-            result.close();
+            get_unverified_payments.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -152,6 +154,7 @@ public class VerifyPaymentsControl {
      */
     private void setupData(ObservableList<UnverifiedPayment> data) {
         unverified_payments_table.getItems().clear();
+
         id_column.setCellValueFactory(new PropertyValueFactory<>("id_number"));
         first_name_column.setCellValueFactory(new PropertyValueFactory<>("first_name"));
         middle_name_column.setCellValueFactory(new PropertyValueFactory<>("middle_name"));
@@ -164,6 +167,7 @@ public class VerifyPaymentsControl {
         last_name_column.setStyle("-fx-alignment: CENTER;");
         suffix_name_column.setStyle("-fx-alignment: CENTER;");
         status_column.setStyle("-fx-alignment: CENTER;");
+
         unverified_payments_table.setItems(data);
     }
 
@@ -174,15 +178,15 @@ public class VerifyPaymentsControl {
         ObservableList<String> block_list = FXCollections.observableArrayList();
         block_list.add("--Select Program--");
         try {
-            String program_code_query = "SELECT DISTINCT `program_code` \n"
-                    + "FROM `members` AS m LEFT JOIN `students` AS s ON m.`member_id` = s.`id_number`\n"
+            String program_code_query = "SELECT DISTINCT `program_code` "
+                    + "FROM `members` AS m LEFT JOIN `students` AS s ON m.`member_id` = s.`id_number` "
                     + "WHERE m.`organization_code` = '" + org_code + "';";
             PreparedStatement get_program_code = connect.prepareStatement(program_code_query);
             ResultSet result = get_program_code.executeQuery();
             while (result.next()) {
                 block_list.add(result.getString("program_code"));
             }
-            result.close();
+            get_program_code.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -210,8 +214,8 @@ public class VerifyPaymentsControl {
             search_id_textfield.clear();
             ObservableList<UnverifiedPayment> unverified_list = FXCollections.observableArrayList();
             try {
-                String unverified_payments_query = "SELECT `id_number`, `first_name`, `middle_name`, `last_name`, `suffix_name`, `status`, `transaction_id`\n"
-                        + "FROM `pays` AS p LEFT JOIN `students` AS s ON p.`payer_id` = s.`id_number`\n"
+                String unverified_payments_query = "SELECT `id_number`, `first_name`, `middle_name`, `last_name`, `suffix_name`, `status`, `transaction_id` "
+                        + "FROM `pays` AS p LEFT JOIN `students` AS s ON p.`payer_id` = s.`id_number` "
                         + "WHERE s.`program_code` = '" + program_code_combobox.getSelectionModel().getSelectedItem() + "' "
                         + "AND s.`year_level` = '" + year_level_combobox.getSelectionModel().getSelectedItem() + "' "
                         + "AND p.`contribution_code` = '" + contribution_code_combobox.getSelectionModel().getSelectedItem() + "' "
@@ -231,7 +235,7 @@ public class VerifyPaymentsControl {
                             suffix_name, status, transaction_id));
                 }
                 setupData(unverified_list);
-                result.close();
+                get_unverified_payments.close();
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
@@ -249,43 +253,36 @@ public class VerifyPaymentsControl {
      */
     @FXML
     private void search_id_button_clicked() {
-        if (!search_id_textfield.getText().isEmpty()) {
-            displayPayments();
-            program_code_combobox.getSelectionModel().selectFirst();
-            year_level_combobox.getSelectionModel().selectFirst();
-            ObservableList<UnverifiedPayment> payer_with_id_list = FXCollections.observableArrayList();
-            try {
-                String search_id_query = "SELECT `id_number`, `first_name`, `middle_name`, `last_name`, `suffix_name`, `status`, `transaction_id`\n"
-                        + "FROM `pays` AS p LEFT JOIN `students` AS s ON p.`payer_id` = s.`id_number`\n"
-                        + "WHERE p.`payer_id` LIKE '%" + search_id_textfield.getText() + "%' "
-                        + "AND p.`contribution_code` = '" + contribution_code_combobox.getSelectionModel().getSelectedItem() + "'\n"
-                        + "AND p.`status` = 'Pending';";
+        displayPayments();
+        program_code_combobox.getSelectionModel().selectFirst();
+        year_level_combobox.getSelectionModel().selectFirst();
 
-                PreparedStatement get_student_id = connect.prepareStatement(search_id_query);
-                ResultSet result = get_student_id.executeQuery();
-                while (result.next()) {
-                    String id_number = result.getString("id_number");
-                    String first_name = result.getString("first_name");
-                    String middle_name = result.getString("middle_name");
-                    String last_name = result.getString("last_name");
-                    String suffix_name = result.getString("suffix_name");
-                    String status = result.getString("status");
-                    long transaction_id = result.getLong("transaction_id");
+        ObservableList<UnverifiedPayment> payer_with_id_list = FXCollections.observableArrayList();
+        try {
+            String search_id_query = "SELECT `id_number`, `first_name`, `middle_name`, `last_name`, `suffix_name`, `status`, `transaction_id` "
+                    + "FROM `pays` AS p LEFT JOIN `students` AS s ON p.`payer_id` = s.`id_number` "
+                    + "WHERE p.`payer_id` LIKE '%" + search_id_textfield.getText() + "%' "
+                    + "AND p.`contribution_code` = '" + contribution_code_combobox.getSelectionModel().getSelectedItem() + "' "
+                    + "AND p.`status` = 'Pending';";
 
-                    payer_with_id_list.add(new UnverifiedPayment(id_number, first_name, middle_name, last_name,
-                            suffix_name, status, transaction_id));
-                }
-                setupData(payer_with_id_list);
-                result.close();
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
+            PreparedStatement get_student_id = connect.prepareStatement(search_id_query);
+            ResultSet result = get_student_id.executeQuery();
+            while (result.next()) {
+                String id_number = result.getString("id_number");
+                String first_name = result.getString("first_name");
+                String middle_name = result.getString("middle_name");
+                String last_name = result.getString("last_name");
+                String suffix_name = result.getString("suffix_name");
+                String status = result.getString("status");
+                long transaction_id = result.getLong("transaction_id");
+
+                payer_with_id_list.add(new UnverifiedPayment(id_number, first_name, middle_name, last_name,
+                        suffix_name, status, transaction_id));
             }
-        } else {
-            Alert success_transaction = new Alert(Alert.AlertType.ERROR);
-            success_transaction.setTitle("Empty ID");
-            success_transaction.setHeaderText(null);
-            success_transaction.setContentText("Please Input ID Number.");
-            success_transaction.showAndWait();
+            setupData(payer_with_id_list);
+            get_student_id.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -325,7 +322,6 @@ public class VerifyPaymentsControl {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-            displayPayments();
         } else {
             Alert non_selected = new Alert(Alert.AlertType.ERROR);
             non_selected.setTitle("No Payment Selected");

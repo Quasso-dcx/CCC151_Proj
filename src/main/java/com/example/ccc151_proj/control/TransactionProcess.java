@@ -129,8 +129,7 @@ public class TransactionProcess {
             no_receipt.showAndWait();
         } else {
             try {
-                String update_payer_status_query = "INSERT INTO `pays` (`contribution_code`, `payer_id`, `payment_mode`, `payer_receipt`, `status`)\n" +
-                        "VALUES (?, ?, ?, ?, 'Pending');";
+                String update_payer_status_query = "INSERT INTO `pays` (`contribution_code`, `payer_id`, `payment_mode`, `payer_receipt`, `status`) VALUES (?, ?, ?, ?, 'Pending');";
                 PreparedStatement insert_payer_status = connect.prepareStatement(update_payer_status_query);
                 insert_payer_status.setString(1, contribution_code);
                 insert_payer_status.setString(2, payer.getId_number());
@@ -146,13 +145,15 @@ public class TransactionProcess {
                         throw new RuntimeException(e);
                     }
                 }
-
                 insert_payer_status.executeUpdate();
                 insert_payer_status.close();
 
                 // for confirmation
-                String transaction_id_query = "SELECT `transaction_id` FROM `pays` WHERE `contribution_code` = '" + contribution_code
-                        + "' AND `payer_id` = '" + payer.getId_number() + "' ORDER BY `transaction_id` DESC;";
+                String transaction_id_query = "SELECT `transaction_id` "
+                        + "FROM `pays` "
+                        + "WHERE `contribution_code` = '" + contribution_code + "' "
+                        + "AND `payer_id` = '" + payer.getId_number() + "' "
+                        + "ORDER BY `transaction_id` DESC;";
                 PreparedStatement get_transaction_id = connect.prepareStatement(transaction_id_query);
                 ResultSet result_id = get_transaction_id.executeQuery();
                 result_id.next();

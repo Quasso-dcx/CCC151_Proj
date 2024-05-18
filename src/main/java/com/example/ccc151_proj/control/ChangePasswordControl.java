@@ -3,6 +3,7 @@ package com.example.ccc151_proj.control;
 import com.example.ccc151_proj.Main;
 import com.example.ccc151_proj.model.DataManager;
 import com.example.ccc151_proj.model.Security;
+
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -85,8 +86,7 @@ public class ChangePasswordControl {
 
                 ButtonType yes = new ButtonType("Yes", ButtonBar.ButtonData.YES);
                 ButtonType no = new ButtonType("No", ButtonBar.ButtonData.NO);
-                Alert password_changed = new Alert(Alert.AlertType.CONFIRMATION,
-                        "You may now proceed to use the app.", yes, no);
+                Alert password_changed = new Alert(Alert.AlertType.CONFIRMATION, "You may now proceed to use the app.", yes, no);
                 password_changed.setTitle("Password Change Successful");
                 password_changed.setHeaderText("Proceed to login?");
                 Optional<ButtonType> buttons = password_changed.showAndWait();
@@ -140,13 +140,12 @@ public class ChangePasswordControl {
      */
     @FXML
     private void show_password_rbutton_clicked() {
+        new_password.setVisible(!show_password_rbutton.isSelected());
+        new_password_show.setVisible(show_password_rbutton.isSelected());
+
         if (show_password_rbutton.isSelected()) {
-            new_password.setVisible(false);
-            new_password_show.setVisible(true);
             new_password_show.setText(new_password.getText());
         } else {
-            new_password.setVisible(true);
-            new_password_show.setVisible(false);
             new_password.setText(new_password_show.getText());
         }
     }
@@ -156,13 +155,12 @@ public class ChangePasswordControl {
      */
     @FXML
     private void show_retype_password_rbutton_clicked() {
+        retype_password.setVisible(!show_retype_password_rbutton.isSelected());
+        retype_password_show.setVisible(show_retype_password_rbutton.isSelected());
+
         if (show_retype_password_rbutton.isSelected()) {
-            retype_password.setVisible(false);
-            retype_password_show.setVisible(true);
             retype_password_show.setText(retype_password.getText());
         } else {
-            retype_password.setVisible(true);
-            retype_password_show.setVisible(false);
             retype_password.setText(retype_password_show.getText());
         }
     }

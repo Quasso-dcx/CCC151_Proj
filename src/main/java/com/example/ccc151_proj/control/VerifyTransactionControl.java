@@ -3,8 +3,7 @@ package com.example.ccc151_proj.control;
 import com.example.ccc151_proj.model.DataManager;
 import com.example.ccc151_proj.model.EmailSender;
 import com.example.ccc151_proj.model.UnverifiedPayment;
-import javafx.animation.PauseTransition;
-import javafx.application.Platform;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -15,6 +14,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
@@ -67,8 +68,8 @@ public class VerifyTransactionControl {
      */
     private void setupData(){
         try {
-            String payment_info_query = "SELECT p.`contribution_code`, `transaction_datetime`, `amount`, `payment_mode`, `payer_receipt`, `transaction_message`\n" +
-                    "FROM `pays` AS p LEFT JOIN `contributions` AS c ON p.`contribution_code` = c.`contribution_code`\n" +
+            String payment_info_query = "SELECT p.`contribution_code`, `transaction_datetime`, `amount`, `payment_mode`, `payer_receipt`, `transaction_message` " +
+                    "FROM `pays` AS p LEFT JOIN `contributions` AS c ON p.`contribution_code` = c.`contribution_code` " +
                     "WHERE p.`transaction_id` =" + payment.getTransaction_id() + ";";
             PreparedStatement get_payment_info = connect.prepareStatement(payment_info_query);
             ResultSet result = get_payment_info.executeQuery();
@@ -79,10 +80,12 @@ public class VerifyTransactionControl {
                 transaction_id.setText(String.valueOf(payment.getTransaction_id()));
                 transaction_datetime.setText(result.getTimestamp("transaction_datetime").toString());
                 transaction_amount.setText(String.valueOf(result.getInt("amount")));
+
                 ObservableList<String> payment_mode =  FXCollections.observableArrayList();
                 payment_mode.add(result.getString("payment_mode"));
                 transaction_payment_mode.setItems(payment_mode);
                 transaction_payment_mode.getSelectionModel().selectFirst();
+
                 receipt_image = result.getBlob("payer_receipt");
                 if (transaction_payment_mode.getValue().equals("Cash"))
                     receipt_link.setText("No Receipt.");
@@ -92,11 +95,14 @@ public class VerifyTransactionControl {
                 receipt_link.setOnAction(e -> {
                     viewReceipt();
                 });
+
                 transaction_status.setText(payment.getStatus());
+
                 String transaction_message = result.getString("transaction_message");
                 if (!result.wasNull())
                     transaction_comments.setText(transaction_message);
             }
+            get_payment_info.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -104,13 +110,13 @@ public class VerifyTransactionControl {
 
     /**
      * Set up the frame that will display the receipt of the payment.
-     *
      */
     private void viewReceipt(){
         Stage receipt_stage = new Stage();
         receipt_stage.getIcons().add(new Image(new File("src/src/app-logo.jpg").toURI().toString()));
         receipt_stage.setResizable(false);
         receipt_stage.initModality(Modality.APPLICATION_MODAL);
+
         try {
             InputStream stream = receipt_image.getBinaryStream();
             Image image = new Image(stream);
@@ -150,8 +156,7 @@ public class VerifyTransactionControl {
         if (result.isPresent() && result.get() == ButtonType.OK){
             try {
                 // if confirmed
-                String accept_payment_query = "UPDATE `pays` SET `status` = 'Accepted', `transaction_message` = ? " +
-                        "WHERE `transaction_id` = ?;";
+                String accept_payment_query = "UPDATE `pays` SET `status` = 'Accepted', `transaction_message` = ? WHERE `transaction_id` = ?;";
                 PreparedStatement update_payment = connect.prepareStatement(accept_payment_query);
                 update_payment.setString(1, transaction_comments.getText());
                 update_payment.setLong(2, payment.getTransaction_id());
@@ -169,10 +174,7 @@ public class VerifyTransactionControl {
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
-
             ((Stage) ((Node) event.getSource()).getScene().getWindow()).close();    // close the frame
-        } else {
-            alert.close();
         }
     }
 
@@ -192,8 +194,7 @@ public class VerifyTransactionControl {
             if (result.isPresent() && result.get() == ButtonType.OK){
                 try {
                     // if confirmed
-                    String accept_payment_query = "UPDATE `pays` SET `status` = 'Rejected', `transaction_message` = ? " +
-                            "WHERE `transaction_id` = ?;";
+                    String accept_payment_query = "UPDATE `pays` SET `status` = 'Rejected', `transaction_message` = ? WHERE `transaction_id` = ?;";
                     PreparedStatement update_payment = connect.prepareStatement(accept_payment_query);
                     update_payment.setString(1, transaction_comments.getText());
                     update_payment.setLong(2, payment.getTransaction_id());
@@ -212,10 +213,10 @@ public class VerifyTransactionControl {
                     throw new RuntimeException(e);
                 }
                 ((Stage) ((Node) event.getSource()).getScene().getWindow()).close();    // close the frame
-            } else {
-                alert.close();
             }
         } else {
+            Border error_border = new Border(new BorderStroke(Color.RED, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT));
+            transaction_comments.setBorder(error_border);
             // reason/s for rejection is required.
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Rejection Comment");
@@ -231,16 +232,11 @@ public class VerifyTransactionControl {
      * @param status
      */
     private void notifyPayer(String end_message, String status){
-        // alert the user so that they won't forcibly close the app in case of delay
-        Alert loading = new Alert(Alert.AlertType.INFORMATION);
-        loading.setContentText("Please Wait.");
-        loading.setHeaderText("The Verification Form will automatically close after sending the email.");
-        loading.setTitle("Sending Email...");
-        loading.showAndWait();
-
         try {
             // get the email address of the payer
-            String payer_email_query = "SELECT `email` FROM `students` WHERE `id_number` = '" + transaction_payer_id.getText() + "';";
+            String payer_email_query = "SELECT `email` "
+                    + "FROM `students` "
+                    + "WHERE `id_number` = '" + transaction_payer_id.getText() + "';";
             PreparedStatement get_payer_email = connect.prepareStatement(payer_email_query);
             ResultSet result = get_payer_email.executeQuery();
             result.next();
@@ -251,7 +247,7 @@ public class VerifyTransactionControl {
             String subject_message = "Payment for " + contribution_code_data[0] + " A.Y. " + contribution_code_data[1] + ", Semester " + contribution_code_data[2];
 
             // create the body of the message, along with the receipt photo if available
-            String receipt_id = " *null* ";
+            String receipt_id = " None ";
             File file = null;
             // since receipt photo is only available when payment mode isn't Cash
             if (!transaction_payment_mode.getValue().equals("Cash")){
@@ -343,9 +339,11 @@ public class VerifyTransactionControl {
                     "\n" +
                     "</body>";
 
+            // send the email in a separate thread to prevent lags
             EmailSender sender = new EmailSender(payer_email, subject_message, message_to_student, file);
             Thread sender_thread = new Thread(sender);
             sender_thread.start();
+
         } catch (IOException | SQLException e){
             throw new RuntimeException(e);
         }

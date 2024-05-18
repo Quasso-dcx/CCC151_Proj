@@ -23,6 +23,7 @@ public class DataManager {
     public static void createConnection() {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
+
             // change for new connection (this is for my personal connection)
             String sql_name = "mysql";
             String host_name = "127.0.0.1";
@@ -32,6 +33,7 @@ public class DataManager {
             String password = "rootPassword";
 
             /*
+            // use this for the online database
             String sql_name = "mysql";
             String host_name = "mysql-110300b9-systemproject.f.aivencloud.com";
             String port = "12738";

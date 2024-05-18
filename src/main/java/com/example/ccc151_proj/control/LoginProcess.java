@@ -31,9 +31,7 @@ import java.util.ResourceBundle;
  * display the appropriate frame of the user.
  */
 public class LoginProcess implements Initializable {
-    private static String academic_year;
     private static Connection connect;
-
     @FXML
     private TextField id_input;
     @FXML
@@ -47,8 +45,7 @@ public class LoginProcess implements Initializable {
     }
 
     /**
-     * Will set up the initial connection to the database. Then fetch necessary
-     * data.
+     * Will set up the initial connection to the database, then connect to the database.
      *
      * @param url
      * @param resourceBundle
@@ -57,7 +54,6 @@ public class LoginProcess implements Initializable {
     public void initialize(URL url, ResourceBundle resourceBundle) {
         DataManager.createConnection();
         connect = DataManager.getConnect();
-        academic_year = DataManager.getAcademic_year();
     }
 
     /**
@@ -75,8 +71,8 @@ public class LoginProcess implements Initializable {
 
             if (this.id_input.getText().isEmpty()) this.id_input.setBorder(error_border);
             if (passwordValue().isEmpty()){
-                this.pass_input.setBorder(error_border);
-                this.pass_input_show.setBorder(error_border);
+                if (!show_password_rbutton.isSelected()) this.pass_input.setBorder(error_border);
+                else this.pass_input_show.setBorder(error_border);
             }
             return;
         }
@@ -142,7 +138,7 @@ public class LoginProcess implements Initializable {
                         } catch (IOException e) {
                             throw new RuntimeException(e);
                         }
-                    } else {
+                    } else if (result.get() == no) {
                         // if the user doesn't want to change the password yet
                         // close the login stage
                         ((Stage) ((Node) event.getSource()).getScene().getWindow()).close();
@@ -200,7 +196,7 @@ public class LoginProcess implements Initializable {
 
                 // initialize the controller
                 ClassRepControl class_rep_control = class_rep_loader.getController();
-                class_rep_control.initialize(this.id_input.getText(), LoginProcess.academic_year);
+                class_rep_control.initialize(this.id_input.getText());
 
                 // create the scene
                 Scene class_rep_scene = new Scene(class_rep_parent);
@@ -250,20 +246,20 @@ public class LoginProcess implements Initializable {
         String recorded_pass;
         try {
             // fetch the password from the database
-            String check_query = "SELECT `password` FROM `users` WHERE `user_id` = '" + id_number + "';";
-            PreparedStatement check_user_info = LoginProcess.connect.prepareStatement(check_query);
-            ResultSet result = check_user_info.executeQuery();
+            String user_info_query = "SELECT `password` FROM `users` WHERE `user_id` = '" + id_number + "';";
+            PreparedStatement get_user_info = LoginProcess.connect.prepareStatement(user_info_query);
+            ResultSet result = get_user_info.executeQuery();
             if (result.next())
                 recorded_pass = result.getString("password");
             else
                 return false; // if the user isn't listed
-            check_user_info.close();
+            get_user_info.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
 
-        if (id_number.equals(password))
-            return password.equals(recorded_pass); // if the password wasn't changed
+        if (id_number.equals(recorded_pass))
+            return recorded_pass.equals(password); // if the password wasn't changed
         else
             return Security.verifyPassword(password, recorded_pass); // if the password was changed
     }

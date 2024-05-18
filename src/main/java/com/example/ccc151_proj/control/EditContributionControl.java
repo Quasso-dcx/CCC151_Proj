@@ -2,6 +2,7 @@ package com.example.ccc151_proj.control;
 
 import com.example.ccc151_proj.model.ContributionProperties;
 import com.example.ccc151_proj.model.DataManager;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -16,10 +17,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Optional;
 
+/**
+ * Since at the beginning of the A.Y., societies aren't collecting contributions.
+ * If the societies decided to collect contributions, use this to edit the collecting contribution.
+ * Just be careful on changing as this will not record the previous set amounts and the paid contributions before the change will not be recorded.
+ */
 public class EditContributionControl {
     private static Connection connect;
-    private String org_code;
-    private String academic_year;
     @FXML
     private TextField organization_code_textfield;
     @FXML
@@ -40,6 +44,8 @@ public class EditContributionControl {
     private TableColumn<ContributionProperties, Integer> amount_column;
     @FXML
     private Button edit_contribution_button;
+    private String org_code;
+    private String academic_year;
 
     public EditContributionControl() {
     }
@@ -115,6 +121,7 @@ public class EditContributionControl {
     private void clear_selection_button_clicked() {
         amount_textfield.clear();
         edit_contribution_button.setDisable(true);
+        semester_combobox.getItems().clear();
         contribution_data_table.getSelectionModel().clearSelection();
     }
 
@@ -124,6 +131,7 @@ public class EditContributionControl {
     @FXML
     private void edit_contribution_button_clicked() {
         if (!amount_textfield.getText().isEmpty()){
+            // only change if the user verifies
             Alert edit_confirmation = new Alert(Alert.AlertType.CONFIRMATION);
             edit_confirmation.setTitle("Edit Confirmation");
             edit_confirmation.setHeaderText("This will change the contribution amount. Any payments accepted before this change will not be affected.");

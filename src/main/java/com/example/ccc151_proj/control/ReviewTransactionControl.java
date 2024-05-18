@@ -69,19 +69,18 @@ public class ReviewTransactionControl {
      */
     private void getPaymentInfo(String payer_id_number, String contribution_code) {
         try {
-            String payment_info_query = "SELECT `id_number`, `first_name`, `middle_name`, `last_name`, `suffix_name`, `transaction_id`, `transaction_datetime`, `amount`, `payment_mode`, `payer_receipt`, `status`, `transaction_message`\n"
-                    + "FROM `pays` AS p LEFT JOIN `contributions` AS c ON p.`contribution_code` = c.`contribution_code`\n"
-                    + "LEFT JOIN `students` AS s ON p.`payer_id` = s.`id_number` \n"
-                    + "WHERE c.`contribution_code` = '" + contribution_code + "'\n"
-                    + "AND p.`payer_id` = '" + payer_id_number + "'\n"
+            String payment_info_query = "SELECT `id_number`, `first_name`, `middle_name`, `last_name`, `suffix_name`, `transaction_id`, `transaction_datetime`, `amount`, `payment_mode`, `payer_receipt`, `status`, `transaction_message` "
+                    + "FROM `pays` AS p LEFT JOIN `contributions` AS c ON p.`contribution_code` = c.`contribution_code` "
+                    + "LEFT JOIN `students` AS s ON p.`payer_id` = s.`id_number` "
+                    + "WHERE c.`contribution_code` = '" + contribution_code + "' "
+                    + "AND p.`payer_id` = '" + payer_id_number + "' "
                     + "ORDER BY `transaction_id` DESC;";
             PreparedStatement get_payment_info = connect.prepareStatement(payment_info_query);
             ResultSet result = get_payment_info.executeQuery();
             result.next();
-            transaction_payer_name.setText(result.getString("last_name") + ", "
-                    + result.getString("first_name") + " "
-                    + result.getString("middle_name") + " "
-                    + result.getString("suffix_name"));
+            String full_name = result.getString("last_name") + ", " + result.getString("first_name")
+                    + " " + result.getString("middle_name") + " " + result.getString("suffix_name");
+            transaction_payer_name.setText(full_name);
             transaction_id.setText(result.getString("transaction_id"));
             transaction_datetime.setText(result.getTimestamp("transaction_datetime").toString());
             transaction_amount.setText(result.getString("amount"));

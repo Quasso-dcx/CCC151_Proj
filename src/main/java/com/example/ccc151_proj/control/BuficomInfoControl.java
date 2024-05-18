@@ -31,7 +31,6 @@ import java.util.Optional;
  */
 public class BuficomInfoControl {
     private static Connection connect;
-    private String user_id_number;
     @FXML
     private TextField user_position_textfield;
     @FXML
@@ -46,6 +45,7 @@ public class BuficomInfoControl {
     private Button transaction_history_button;
     @FXML
     private Button students_records_button;
+    private String user_id_number;
     private HBox parent;
 
     public BuficomInfoControl() {
@@ -59,6 +59,9 @@ public class BuficomInfoControl {
      * @param user_position
      */
     public void initialize(HBox parent, String user_id_number, String user_position) {
+        connect = DataManager.getConnect();
+
+        // get the parent scene for later transition based on the selected button
         this.parent = parent;
 
         // just use this default photo because we don't have enough time to implement
@@ -67,7 +70,6 @@ public class BuficomInfoControl {
         Image image = new Image(file.toURI().toString());
         org_image.setImage(image);
 
-        connect = DataManager.getConnect();
         this.user_id_number = user_id_number;
         user_position_textfield.setText(user_position);
         user_position_textfield.setTooltip(new Tooltip(this.user_id_number));
@@ -76,6 +78,7 @@ public class BuficomInfoControl {
 
     /**
      * Get the organization code of the user.
+     *
      * @return organization_code
      */
     public String getOrg_code() {
@@ -88,12 +91,12 @@ public class BuficomInfoControl {
      * @param clicked
      */
     private void currentlyDisplayed(Button clicked){
-        verify_payments_button.setDisable(verify_payments_button == clicked);
-        verify_payments_button.setUnderline(verify_payments_button == clicked);
-        transaction_history_button.setDisable(transaction_history_button == clicked);
-        transaction_history_button.setUnderline(transaction_history_button == clicked);
-        students_records_button.setDisable(students_records_button == clicked);
-        students_records_button.setUnderline(students_records_button == clicked);
+        verify_payments_button.setDisable(verify_payments_button.equals(clicked));
+        verify_payments_button.setUnderline(verify_payments_button.equals(clicked));
+        transaction_history_button.setDisable(transaction_history_button.equals(clicked));
+        transaction_history_button.setUnderline(transaction_history_button.equals(clicked));
+        students_records_button.setDisable(students_records_button.equals(clicked));
+        students_records_button.setUnderline(students_records_button.equals(clicked));
     }
 
     /**
@@ -103,14 +106,17 @@ public class BuficomInfoControl {
     private void verify_payments_clicked() {
         currentlyDisplayed(verify_payments_button);
 
+        // remove the display on the right side
         ObservableList<Node> children = parent.getChildren();
         parent.getChildren().remove(children.get(1));
         try {
+            // load and add the scene to the parent to be displayed
             FXMLLoader dashboard_loader = new FXMLLoader(
                     Main.class.getResource("BUFICOM-FRAMES/verify-payments.fxml"));
             AnchorPane dashboard = dashboard_loader.load();
             VerifyPaymentsControl dashboard_control = dashboard_loader.getController();
             dashboard_control.initialize(org_code_textfield.getText());
+
             parent.getChildren().add(dashboard);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -124,14 +130,17 @@ public class BuficomInfoControl {
     private void transaction_history_clicked() {
         currentlyDisplayed(transaction_history_button);
 
+        // remove the display on the right side
         ObservableList<Node> children = parent.getChildren();
         parent.getChildren().remove(children.get(1));
         try {
+            // load and add the scene to the parent to be displayed
             FXMLLoader dashboard_loader = new FXMLLoader(
                     Main.class.getResource("BUFICOM-FRAMES/transaction-history.fxml"));
             AnchorPane dashboard = dashboard_loader.load();
             TransactionHistoryControl dashboard_control = dashboard_loader.getController();
             dashboard_control.initialize(org_code_textfield.getText());
+
             parent.getChildren().add(dashboard);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -145,14 +154,17 @@ public class BuficomInfoControl {
     private void students_records_clicked() {
         currentlyDisplayed(students_records_button);
 
+        // remove the display on the right side
         ObservableList<Node> children = parent.getChildren();
         parent.getChildren().remove(children.get(1));
         try {
+            // load and add the scene to the parent to be displayed
             FXMLLoader dashboard_loader = new FXMLLoader(
                     Main.class.getResource("BUFICOM-FRAMES/students-records.fxml"));
             AnchorPane dashboard = dashboard_loader.load();
             StudentsRecordsControl dashboard_control = dashboard_loader.getController();
             dashboard_control.initialize(org_code_textfield.getText());
+
             parent.getChildren().add(dashboard);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -165,21 +177,24 @@ public class BuficomInfoControl {
     @FXML
     private void edit_contribution_button_clicked() {
         try {
-            Stage add_contribution_stage = new Stage();
-            add_contribution_stage.getIcons().add(new Image(new File("src/src/app-logo.jpg").toURI().toString()));
-            add_contribution_stage.setResizable(false);
-            add_contribution_stage.setTitle("Edit Contributions");
+            // create and set up the stage
+            Stage edit_contribution_stage = new Stage();
+            edit_contribution_stage.getIcons().add(new Image(new File("src/src/app-logo.jpg").toURI().toString()));
+            edit_contribution_stage.setResizable(false);
+            edit_contribution_stage.setTitle("Edit Contributions");
+            edit_contribution_stage.initModality(Modality.APPLICATION_MODAL);
 
-            add_contribution_stage.initModality(Modality.APPLICATION_MODAL);
-            FXMLLoader add_contribution_loader = new FXMLLoader(
+            // load the display
+            FXMLLoader edit_contribution_loader = new FXMLLoader(
                     Main.class.getResource("BUFICOM-FRAMES/edit-contribution-form.fxml"));
-            Parent edit_contribution_parent = add_contribution_loader.load();
-            EditContributionControl add_contribution_control = add_contribution_loader.getController();
-            add_contribution_control.initialize(org_code_textfield.getText());
+            Parent edit_contribution_parent = edit_contribution_loader.load();
+            EditContributionControl edit_contribution_control = edit_contribution_loader.getController();
+            edit_contribution_control.initialize(org_code_textfield.getText());
 
-            Scene add_contribution_scene = new Scene(edit_contribution_parent);
-            add_contribution_stage.setScene(add_contribution_scene);
-            add_contribution_stage.show();
+            // create the scene
+            Scene edit_contribution_scene = new Scene(edit_contribution_parent);
+            edit_contribution_stage.setScene(edit_contribution_scene);
+            edit_contribution_stage.show();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -190,7 +205,8 @@ public class BuficomInfoControl {
      */
     private void getUserOrgInfo() {
         try {
-            String org_code_query = "SELECT m.`organization_code`, o.`organization_name` FROM `manages` AS m LEFT JOIN `organizations` AS o "
+            String org_code_query = "SELECT m.`organization_code`, o.`organization_name` "
+                    + "FROM `manages` AS m LEFT JOIN `organizations` AS o "
                     + "ON m.`organization_code` = o.`organization_code` "
                     + "WHERE `officer_id` =  '" + user_id_number + "';";
             PreparedStatement get_org_code = connect.prepareStatement(org_code_query);
@@ -205,6 +221,11 @@ public class BuficomInfoControl {
         }
     }
 
+    /**
+     * Display again the login stage when the user logs out.
+     *
+     * @param event
+     */
     @FXML
     private void logout_button_clicked(ActionEvent event){
         Alert logout_confirmation = new Alert(Alert.AlertType.CONFIRMATION);

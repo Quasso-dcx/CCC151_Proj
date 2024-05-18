@@ -4,6 +4,7 @@ import com.example.ccc151_proj.Main;
 import com.example.ccc151_proj.model.ContributionProperties;
 import com.example.ccc151_proj.model.DataManager;
 import com.example.ccc151_proj.model.StudentPaymentInfo;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -16,22 +17,16 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.io.IOException;
-import java.net.URL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ResourceBundle;
 
 /**
  * Facilitates the process of the Class Rep frame.
  */
 public class StudentsRecordsControl {
     private static Connection connect;
-    @FXML
-    private URL location;
-    @FXML
-    private ResourceBundle resources;
     @FXML
     private TableView<ContributionProperties> contribution_data_table;
     @FXML
@@ -83,7 +78,7 @@ public class StudentsRecordsControl {
     }
 
     /**
-     * Set the initial display. Along with the information of the class rep user.
+     * Set the initial display along with the necessary information.
      *
      * @param org_code
      */
@@ -100,7 +95,7 @@ public class StudentsRecordsControl {
     }
 
     /**
-     * Enable the search button when an input is provided in the textfield.
+     * Enable the search button when an input is provided in the textField.
      */
     private void searchSetup(){
         search_id.textProperty().addListener((ov, t, textField) -> {
@@ -119,89 +114,73 @@ public class StudentsRecordsControl {
     private void getStatistics(String program_code, String year_level){
         try {
             String students_paid_1_query;
+            // if there is no specific block to be displayed
             if (program_code == null && year_level == null)
-                students_paid_1_query = "SELECT COUNT(p.`status`) AS `Students Paid` FROM `pays` AS p LEFT JOIN `students` AS s ON p.`payer_id` = s.`id_number` "
+                students_paid_1_query = "SELECT COUNT(p.`status`) AS `Students Paid` "
+                        + "FROM `pays` AS p LEFT JOIN `students` AS s ON p.`payer_id` = s.`id_number` "
                         + "WHERE p.`contribution_code` = '" + contribution_data_table.getItems().get(0).getContribution_code() + "' "
                         + "AND p.`status` = 'Accepted';";
             else
-                students_paid_1_query = "SELECT COUNT(p.`status`) AS `Students Paid` FROM `pays` AS p LEFT JOIN `students` AS s ON p.`payer_id` = s.`id_number` "
+                students_paid_1_query = "SELECT COUNT(p.`status`) AS `Students Paid` "
+                        + "FROM `pays` AS p LEFT JOIN `students` AS s ON p.`payer_id` = s.`id_number` "
                         + "WHERE p.`contribution_code` = '" + contribution_data_table.getItems().get(0).getContribution_code() + "' "
                         + "AND s.`program_code` = '" + program_code + "' "
                         + "AND s.`year_level` = '" + year_level + "' "
                         + "AND p.`status` = 'Accepted';";
-
             PreparedStatement get_students_paid_1 = connect.prepareStatement(students_paid_1_query);
             ResultSet result = get_students_paid_1.executeQuery();
             int student_paid_1_count = 0;
             if (result.next()){
                 student_paid_1_count += result.getInt("Students Paid");
             }
-
-            String students_total_1_query;
-            if (program_code == null && year_level == null)
-                students_total_1_query = "SELECT COUNT(`member_id`) AS `Students Total` FROM `members` " +
-                        "WHERE `organization_code` = '" + org_code + "' ;";
-            else
-                students_total_1_query = "SELECT COUNT(m.`member_id`) AS `Students Total` FROM `members` AS m LEFT JOIN `students` AS s "
-                        + "ON m.`member_id` = s.`id_number` "
-                        + "WHERE m.`organization_code` = '" + org_code + "' "
-                        + "AND s.`program_code` = '" + program_code + "' "
-                        + "AND s.`year_level` = '" + year_level + "';";
-
-            PreparedStatement get_students_total_1 = connect.prepareStatement(students_total_1_query);
-            result = get_students_total_1.executeQuery();
-            int student_total_1_count = 0;
-            if (result.next()){
-                student_total_1_count += result.getInt("Students Total");
-            }
-
-            paid_students1.setText(student_paid_1_count + " out of " + student_total_1_count);
-            money_collected1.setText("Php " + student_paid_1_count*contribution_data_table.getItems().get(0).getContribution_amount());
             get_students_paid_1.close();
-            get_students_total_1.close();
 
             String students_paid_2_query;
             if (program_code == null && year_level == null)
-                students_paid_2_query = "SELECT COUNT(p.`status`) AS `Students Paid` FROM `pays` AS p LEFT JOIN `students` AS s ON p.`payer_id` = s.`id_number` "
+                students_paid_2_query = "SELECT COUNT(p.`status`) AS `Students Paid` "
+                        + "FROM `pays` AS p LEFT JOIN `students` AS s ON p.`payer_id` = s.`id_number` "
                         + "WHERE p.`contribution_code` = '" + contribution_data_table.getItems().get(1).getContribution_code() + "' "
                         + "AND p.`status` = 'Accepted';";
             else
-                students_paid_2_query = "SELECT COUNT(p.`status`) AS `Students Paid` FROM `pays` AS p LEFT JOIN `students` AS s ON p.`payer_id` = s.`id_number` "
+                students_paid_2_query = "SELECT COUNT(p.`status`) AS `Students Paid` "
+                        + "FROM `pays` AS p LEFT JOIN `students` AS s ON p.`payer_id` = s.`id_number` "
                         + "WHERE p.`contribution_code` = '" + contribution_data_table.getItems().get(1).getContribution_code() + "' "
                         + "AND s.`program_code` = '" + program_code + "' "
                         + "AND s.`year_level` = '" + year_level + "' "
                         + "AND p.`status` = 'Accepted';";
-
             PreparedStatement get_students_paid_2 = connect.prepareStatement(students_paid_2_query);
             result = get_students_paid_2.executeQuery();
             int student_paid_2_count = 0;
             if (result.next()){
                 student_paid_2_count += result.getInt("Students Paid");
             }
+            get_students_paid_2.close();
 
-            String students_total_2_query;
+            String students_total_query;
             if (program_code == null && year_level == null)
-                students_total_2_query = "SELECT COUNT(`member_id`) AS `Students Total` FROM `members` " +
-                        "WHERE `organization_code` = '" + org_code + "' ;";
+                students_total_query = "SELECT COUNT(`member_id`) AS `Students Total` "
+                        + "FROM `members` "
+                        + "WHERE `organization_code` = '" + org_code + "' ;";
             else
-                students_total_2_query = "SELECT COUNT(m.`member_id`) AS `Students Total` FROM `members` AS m LEFT JOIN `students` AS s "
+                students_total_query = "SELECT COUNT(m.`member_id`) AS `Students Total` "
+                        + "FROM `members` AS m LEFT JOIN `students` AS s "
                         + "ON m.`member_id` = s.`id_number` "
                         + "WHERE m.`organization_code` = '" + org_code + "' "
                         + "AND s.`program_code` = '" + program_code + "' "
                         + "AND s.`year_level` = '" + year_level + "';";
-
-            PreparedStatement get_students_total_2 = connect.prepareStatement(students_total_2_query);
-            result = get_students_total_2.executeQuery();
-            int student_total_2_count = 0;
+            PreparedStatement get_students_total = connect.prepareStatement(students_total_query);
+            result = get_students_total.executeQuery();
+            int student_total_count = 0;
             if (result.next()){
-                student_total_2_count += result.getInt("Students Total");
+                student_total_count += result.getInt("Students Total");
             }
+            get_students_total.close();
 
-            paid_students2.setText(student_paid_2_count + " out of " + student_total_2_count);
+            paid_students1.setText(student_paid_1_count + " out of " + student_total_count);
+            money_collected1.setText("Php " + student_paid_1_count*contribution_data_table.getItems().get(0).getContribution_amount());
+
+            paid_students2.setText(student_paid_2_count + " out of " + student_total_count);
             money_collected2.setText("Php " + student_paid_2_count*contribution_data_table.getItems().get(1).getContribution_amount());
-
-            get_students_paid_2.close();
-            get_students_total_2.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -215,10 +194,11 @@ public class StudentsRecordsControl {
     private ObservableList<ContributionProperties> getContributions() {
         ObservableList<ContributionProperties> contributions_list = FXCollections.observableArrayList();
         try {
-            String contribution_data_query = "SELECT `contribution_code`, `semester`,`amount` FROM `contributions` WHERE `academic_year` = \'"
-                    + academic_year + "\' AND `collecting_org_code` = \'" + org_code
-                    + "\' ORDER BY `contribution_code` ASC;";
-
+            String contribution_data_query = "SELECT `contribution_code`, `semester`,`amount` "
+                    + "FROM `contributions` "
+                    + "WHERE `academic_year` = '" + academic_year + "' "
+                    + "AND `collecting_org_code` = '" + org_code + "' "
+                    + "ORDER BY `contribution_code` ASC;";
             PreparedStatement get_contributions_data = connect.prepareStatement(contribution_data_query);
             ResultSet result = get_contributions_data.executeQuery();
 
@@ -258,15 +238,15 @@ public class StudentsRecordsControl {
         ObservableList<String> block_list = FXCollections.observableArrayList();
         block_list.add("--Select Program--");
         try {
-            String program_code_query = "SELECT DISTINCT `program_code` \n"
-                    + "FROM `members` AS m LEFT JOIN `students` AS s ON m.`member_id` = s.`id_number`\n"
-                    + "WHERE m.`organization_code` = \'" + org_code + "\';";
+            String program_code_query = "SELECT DISTINCT s.`program_code` "
+                    + "FROM `members` AS m LEFT JOIN `students` AS s ON m.`member_id` = s.`id_number` "
+                    + "WHERE m.`organization_code` = '" + org_code + "';";
             PreparedStatement get_program_code = connect.prepareStatement(program_code_query);
             ResultSet result = get_program_code.executeQuery();
             while (result.next()) {
                 block_list.add(result.getString("program_code"));
             }
-            result.close();
+            get_program_code.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -289,8 +269,7 @@ public class StudentsRecordsControl {
      */
     @FXML
     private void search_block_button_clicked() {
-        if (!program_code_combobox.getValue().equals("--Select Program--")
-                && !year_level_combobox.getValue().equals("--Select Year--")) {
+        if (!program_code_combobox.getValue().equals("--Select Program--") && !year_level_combobox.getValue().equals("--Select Year--")) {
             student_data_table.getItems().clear();
             search_id.clear();
 
@@ -299,10 +278,9 @@ public class StudentsRecordsControl {
 
             setupStudentsData(member_list);
             getStatistics(program_code_combobox.getValue(), year_level_combobox.getValue());
-        } else if (program_code_combobox.getValue().equals("--Select Program--")
-                && year_level_combobox.getValue().equals("--Select Year--")){
+        } else if (program_code_combobox.getValue().equals("--Select Program--") && year_level_combobox.getValue().equals("--Select Year--")){
             resetSearch();
-            getStatistics(null, null);
+
         } else {
             Alert success_transaction = new Alert(Alert.AlertType.ERROR);
             success_transaction.setTitle("Invalid Block");
@@ -353,22 +331,22 @@ public class StudentsRecordsControl {
             // get the list of every member in the organization
             members_data_query = "SELECT `id_number`, `first_name`,`middle_name`, `last_name`, `suffix_name`, `year_level` "
                     + "FROM `members` AS m LEFT JOIN `students` AS s ON m.`member_id` = s.`id_number` "
-                    + "WHERE m.`organization_code` = \'" + org_code + "\' "
+                    + "WHERE m.`organization_code` = '" + org_code + "' "
                     + "ORDER BY `last_name` ASC, `first_name` ASC, `middle_name` ASC, `program_code` ASC, `year_level` ASC;";
         } else if (program_code_search == null && year_level_search == null) {
             // get the list of every student with matching id number
             members_data_query = "SELECT `id_number`, `first_name`,`middle_name`, `last_name`, `suffix_name`, `year_level` "
                     + "FROM `members` AS m LEFT JOIN `students` AS s ON m.`member_id` = s.`id_number` "
-                    + "WHERE m.`organization_code` = \'" + org_code + "\' "
-                    + "AND s.`id_number` LIKE \'%" + id_number_search + "%\' "
+                    + "WHERE m.`organization_code` = '" + org_code + "' "
+                    + "AND s.`id_number` LIKE '%" + id_number_search + "%' "
                     + "ORDER BY `last_name` ASC, `first_name` ASC, `middle_name` ASC;";
         } else if (id_number_search == null) {
             // get the list of every student in the searched block
             members_data_query = "SELECT `id_number`, `first_name`,`middle_name`, `last_name`, `suffix_name`, `year_level` "
                     + "FROM `members` AS m LEFT JOIN `students` AS s ON m.`member_id` = s.`id_number` "
-                    + "WHERE m.`organization_code` = \'" + org_code + "\' "
-                    + "AND s.`program_code` = \'" + program_code_search + "\' "
-                    + "AND s.`year_level` = \'" + year_level_search + "\' "
+                    + "WHERE m.`organization_code` = '" + org_code + "' "
+                    + "AND s.`program_code` = '" + program_code_search + "' "
+                    + "AND s.`year_level` = '" + year_level_search + "' "
                     + "ORDER BY `last_name` ASC, `first_name` ASC, `middle_name` ASC;";
         } else {
             return null;
@@ -398,10 +376,10 @@ public class StudentsRecordsControl {
                     first_sem_status = "Paid"; // if there is no contribution to be paid
                 } else {
                     // get their status for first sem
-                    payment_status_query = "SELECT `status` FROM `pays` "
-                            + "WHERE `payer_id` = \'" + id_number + "\' "
-                            + "AND `contribution_code` = \'"
-                            + contribution_data_table.getItems().get(0).getContribution_code() + "\' "
+                    payment_status_query = "SELECT `status` "
+                            + "FROM `pays` "
+                            + "WHERE `payer_id` = '" + id_number + "' "
+                            + "AND `contribution_code` = '" + contribution_data_table.getItems().get(0).getContribution_code() + "' "
                             + "ORDER BY `transaction_id` DESC;";
 
                     get_payment_status = connect.prepareStatement(payment_status_query);
@@ -419,9 +397,10 @@ public class StudentsRecordsControl {
                     second_sem_status = "Paid"; // if there is no contribution to be paid
                 } else {
                     // get their status for second sem
-                    payment_status_query = "SELECT `status` FROM `pays` WHERE `payer_id` = \'" + id_number + "\' "
-                            + "AND `contribution_code` = \'"
-                            + contribution_data_table.getItems().get(1).getContribution_code() + "\' "
+                    payment_status_query = "SELECT `status` "
+                            + "FROM `pays` "
+                            + "WHERE `payer_id` = '" + id_number + "' "
+                            + "AND `contribution_code` = '" + contribution_data_table.getItems().get(1).getContribution_code() + "' "
                             + "ORDER BY `transaction_id` DESC;";
                     get_payment_status = connect.prepareStatement(payment_status_query);
                     result_2 = get_payment_status.executeQuery();
@@ -607,22 +586,14 @@ public class StudentsRecordsControl {
      */
     @FXML
     private void searchID() {
-        if (!search_id.getText().isEmpty()) {
-            student_data_table.getItems().clear();
-            program_code_combobox.getSelectionModel().selectFirst();
-            year_level_combobox.getSelectionModel().selectFirst();
+        student_data_table.getItems().clear();
+        program_code_combobox.getSelectionModel().selectFirst();
+        year_level_combobox.getSelectionModel().selectFirst();
 
-            ObservableList<StudentPaymentInfo> member_list = getPayersList(search_id.getText(), null, null);
-            setupStudentsData(member_list);
+        ObservableList<StudentPaymentInfo> member_list = getPayersList(search_id.getText(), null, null);
+        setupStudentsData(member_list);
 
-            getStatistics(null, null);
-        } else {
-            Alert success_transaction = new Alert(Alert.AlertType.ERROR);
-            success_transaction.setTitle("Empty ID");
-            success_transaction.setHeaderText(null);
-            success_transaction.setContentText("Please Input ID Number.");
-            success_transaction.showAndWait();
-        }
+        getStatistics(null, null);
     }
 
     /**
@@ -638,6 +609,8 @@ public class StudentsRecordsControl {
 
         ObservableList<StudentPaymentInfo> details_students = getPayersList(null, null, null);
         student_data_table.setItems(details_students);
+
+        getStatistics(null, null);
     }
 
     /**
@@ -646,12 +619,10 @@ public class StudentsRecordsControl {
     @FXML
     private void setupContextMenu() {
         StudentPaymentInfo student_selected = student_data_table.getSelectionModel().getSelectedItem();
-        if (student_selected == null) {
-            show_first_sem_transaction.setDisable(true);
-            show_second_sem_transaction.setDisable(true);
-        } else {
-            show_first_sem_transaction.setDisable(student_selected.getFirst_sem_status().equals("Not Paid"));
-            show_second_sem_transaction.setDisable(student_selected.getSecond_sem_status().equals("Not Paid"));
-        }
+        boolean first_sem = (student_selected == null) || (student_selected.getFirst_sem_status().equals("Not Paid"));
+        boolean second_sem = (student_selected == null) || (student_selected.getSecond_sem_status().equals("Not Paid"));
+
+        show_first_sem_transaction.setDisable(first_sem);
+        show_second_sem_transaction.setDisable(second_sem);
     }
 }

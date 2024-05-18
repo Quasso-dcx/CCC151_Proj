@@ -5,6 +5,7 @@ import com.example.ccc151_proj.model.ContributionProperties;
 import com.example.ccc151_proj.model.DataManager;
 import com.example.ccc151_proj.model.StudentPaymentInfo;
 import com.example.ccc151_proj.model.UserData;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -99,19 +100,19 @@ public class ClassRepControl {
      * Set the initial display. Along with the information of the class rep user.
      *
      * @param user_id_number
-     * @param academic_year
      */
-    public void initialize(String user_id_number, String academic_year) {
+    public void initialize(String user_id_number) {
         connect = DataManager.getConnect();
 
         // get the current academic year
-        this.academic_year = academic_year;
+        this.academic_year = DataManager.getAcademic_year();
 
         // get the user details
         getUserData(user_id_number);
 
-        // just use this default photo because we don't have enough time to implement
-        // changing of profile. Bitaw kapoy na :<<
+        /*
+        Just use this default photo because we don't have enough time to implement changing of profile. Bitaw kapoy na :<<
+         */
         File file = new File("src/main/resources/Image/profile (1).png");
         Image image = new Image(file.toURI().toString());
         user_image.setImage(image);
@@ -131,7 +132,7 @@ public class ClassRepControl {
     }
 
     /**
-     * Enable the search button when an input is provided in the textfield.
+     * Enable the search button only when an input is provided in the textfield.
      */
     private void searchSetup(){
         search_id.textProperty().addListener((ov, t, textField) -> {
@@ -149,7 +150,9 @@ public class ClassRepControl {
      */
     private void getStatistics(){
         try {
-            String students_paid_1_query = "SELECT COUNT(p.`status`) AS `Students Paid` FROM `pays` AS p LEFT JOIN `students` AS s ON p.`payer_id` = s.`id_number` "
+            // get the number of students in the block that already paid first sem
+            String students_paid_1_query = "SELECT COUNT(p.`status`) AS `Students Paid` "
+                    + "FROM `pays` AS p LEFT JOIN `students` AS s ON p.`payer_id` = s.`id_number` "
                     + "WHERE p.`contribution_code` = '" + contribution_data_table.getItems().get(0).getContribution_code() + "' "
                     + "AND s.`program_code` = '" + user.getProgram_code() + "' "
                     + "AND s.`year_level` = '" + user.getYear_level() + "' "
@@ -160,52 +163,41 @@ public class ClassRepControl {
             if (result.next()){
                 student_paid_1_count += result.getInt("Students Paid");
             }
-
-            String students_total_1_query = "SELECT COUNT(`id_number`) AS `Students Total` FROM `students` " +
-                    "WHERE `program_code` = '" + user.getProgram_code() + "' " +
-                    "AND `year_level` = '" + user.getYear_level() + "';";
-
-            PreparedStatement get_students_total_1 = connect.prepareStatement(students_total_1_query);
-            result = get_students_total_1.executeQuery();
-            int student_total_1_count = 0;
-            if (result.next()){
-                student_total_1_count += result.getInt("Students Total");
-            }
-
-            paid_students1.setText(student_paid_1_count + " out of " + student_total_1_count);
-            money_collected1.setText("Php " + student_paid_1_count*contribution_data_table.getItems().get(0).getContribution_amount());
             get_students_paid_1.close();
-            get_students_total_1.close();
 
-            String students_paid_2_query = "SELECT COUNT(p.`status`) AS `Students Paid` FROM `pays` AS p LEFT JOIN `students` AS s ON p.`payer_id` = s.`id_number` "
+            // get the number of students in the block that already paid second sem
+            String students_paid_2_query = "SELECT COUNT(p.`status`) AS `Students Paid` "
+                    + "FROM `pays` AS p LEFT JOIN `students` AS s ON p.`payer_id` = s.`id_number` "
                     + "WHERE p.`contribution_code` = '" + contribution_data_table.getItems().get(1).getContribution_code() + "' "
                     + "AND s.`program_code` = '" + user.getProgram_code() + "' "
                     + "AND s.`year_level` = '" + user.getYear_level() + "' "
                     + "AND p.`status` = 'Accepted';";
-
             PreparedStatement get_students_paid_2 = connect.prepareStatement(students_paid_2_query);
             result = get_students_paid_2.executeQuery();
             int student_paid_2_count = 0;
             if (result.next()){
                 student_paid_2_count += result.getInt("Students Paid");
             }
-
-            String students_total_2_query = "SELECT COUNT(`id_number`) AS `Students Total` FROM `students` " +
-                    "WHERE `program_code` = '" + user.getProgram_code() + "' " +
-                    "AND `year_level` = '" + user.getYear_level() + "';";
-
-            PreparedStatement get_students_total_2 = connect.prepareStatement(students_total_2_query);
-            result = get_students_total_2.executeQuery();
-            int student_total_2_count = 0;
-            if (result.next()){
-                student_total_2_count += result.getInt("Students Total");
-            }
-
-            paid_students2.setText(student_paid_2_count + " out of " + student_total_2_count);
-            money_collected2.setText("Php " + student_paid_2_count*contribution_data_table.getItems().get(1).getContribution_amount());
-
             get_students_paid_2.close();
-            get_students_total_2.close();
+
+            // get the count of students in the same block as the user
+            String students_total_query = "SELECT COUNT(`id_number`) AS `Students Total` "
+                    + "FROM `students` "
+                    + "WHERE `program_code` = '" + user.getProgram_code() + "' "
+                    + "AND `year_level` = '" + user.getYear_level() + "';";
+            PreparedStatement get_students_total = connect.prepareStatement(students_total_query);
+            result = get_students_total.executeQuery();
+            int student_total_count = 0;
+            if (result.next()){
+                student_total_count += result.getInt("Students Total");
+            }
+            get_students_total.close();
+
+            paid_students1.setText(student_paid_1_count + " out of " + student_total_count);
+            money_collected1.setText("Php " + student_paid_1_count*contribution_data_table.getItems().get(0).getContribution_amount());
+
+            paid_students2.setText(student_paid_2_count + " out of " + student_total_count);
+            money_collected2.setText("Php " + student_paid_2_count*contribution_data_table.getItems().get(1).getContribution_amount());
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -277,7 +269,6 @@ public class ClassRepControl {
                     + "WHERE `academic_year` = '" + academic_year + "' "
                     + "AND `collecting_org_code` = '" + org_code.getText() + "' "
                     + "ORDER BY `contribution_code` ASC;";
-
             PreparedStatement get_contributions_data = connect.prepareStatement(user_data_query);
             ResultSet result = get_contributions_data.executeQuery();
 
@@ -408,7 +399,8 @@ public class ClassRepControl {
                     first_sem_status = "Paid"; // if there is no contribution to be paid
                 } else {
                     // get their status for first sem
-                    payment_status_query = "SELECT `status` FROM `pays` "
+                    payment_status_query = "SELECT `status` "
+                            + "FROM `pays` "
                             + "WHERE `payer_id` = '" + id_number + "' "
                             + "AND `contribution_code` = '"
                             + contribution_data_table.getItems().get(0).getContribution_code() + "' "
@@ -429,7 +421,9 @@ public class ClassRepControl {
                     second_sem_status = "Paid"; // if there is no contribution to be paid
                 } else {
                     // get their status for second sem
-                    payment_status_query = "SELECT `status` FROM `pays` WHERE `payer_id` = '" + id_number + "' "
+                    payment_status_query = "SELECT `status` "
+                            + "FROM `pays` "
+                            + "WHERE `payer_id` = '" + id_number + "' "
                             + "AND `contribution_code` = '"
                             + contribution_data_table.getItems().get(1).getContribution_code() + "' "
                             + "ORDER BY `transaction_id` DESC;";
@@ -480,12 +474,10 @@ public class ClassRepControl {
      * @param clicked
      */
     private void currentlyDisplayed(Button clicked){
-        ec_button.setDisable(false);
-        ec_button.setUnderline(false);
-        society_button.setDisable(false);
-        society_button.setUnderline(false);
-        clicked.setDisable(true);
-        clicked.setUnderline(true);
+        ec_button.setDisable(ec_button.equals(clicked));
+        ec_button.setUnderline(ec_button.equals(clicked));
+        society_button.setDisable(society_button.equals(clicked));
+        society_button.setUnderline(society_button.equals(clicked));
     }
 
     /**
