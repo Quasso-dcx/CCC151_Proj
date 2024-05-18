@@ -25,22 +25,13 @@ public class DataManager {
             Class.forName("com.mysql.cj.jdbc.Driver");
             // change for new connection (this is for my personal connection)
             String sql_name = "mysql";
-            String host_name = "127.0.0.1";
-            String port = "3306";
-            String schema_name = "Student_Payment_System";
-            String username = "root";
-            String password = "rootPassword";
-
-            /*
-            String sql_name = "mysql";
-            String host_name = "mysql-110300b9-systemproject.f.aivencloud.com";
+            String connection_name = "mysql-110300b9-systemproject.f.aivencloud.com";
             String port = "12738";
             String schema_name = "student_payment_system";
-            String username = "user_admin";
-            String password = "AVNS_wQT83-LDuTCcf-SLtIu";
-             */
+            String username = "avnadmin";
+            String password = "AVNS_6HQqlbv9YUU9kIkdGBj";
 
-            connect = DriverManager.getConnection("jdbc:" + sql_name + "://" + host_name + ":" + port + "/" + schema_name, username, password);
+            connect = DriverManager.getConnection("jdbc:" + sql_name + "://" + connection_name + ":" + port + "/" + schema_name, username, password);
         } catch (SQLException | ClassNotFoundException e) {
             Alert connection_error = new Alert(Alert.AlertType.ERROR);
             connection_error.setTitle("Database Connection Error");
