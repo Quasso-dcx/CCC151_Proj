@@ -54,6 +54,7 @@ public class EditContributionControl {
 
         organization_code_textfield.setText(this.org_code);
         academic_year_textfield.setText(this.academic_year);
+        semester_combobox.getSelectionModel().selectFirst();
 
         ObservableList<ContributionProperties> contribution_list = FXCollections.observableArrayList();
         try {
@@ -111,7 +112,6 @@ public class EditContributionControl {
      */
     @FXML
     private void clear_selection_button_clicked() {
-        semester_combobox.getSelectionModel().selectFirst();
         amount_textfield.clear();
         edit_contribution_button.setDisable(true);
         contribution_data_table.getSelectionModel().clearSelection();
@@ -139,6 +139,5 @@ public class EditContributionControl {
             Border error_border = new Border(new BorderStroke(Color.RED, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT));
             amount_textfield.setBorder(error_border);
         }
-
     }
 }
