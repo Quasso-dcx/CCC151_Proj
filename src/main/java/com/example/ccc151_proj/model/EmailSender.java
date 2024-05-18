@@ -10,7 +10,6 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -96,7 +95,7 @@ public class EmailSender implements Runnable {
      * @return message
      */
     private Message prepareMessage(Session session, String myEmail, String recipientEmail, String subject_message,
-                                          String message_to_student, FileDataSource payment_receipt) {
+                                   String message_to_student, FileDataSource payment_receipt) {
         try {
             // initiate the message
             Message message = new MimeMessage(session);
