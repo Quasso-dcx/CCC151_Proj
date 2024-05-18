@@ -12,8 +12,8 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.HBox;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 import java.io.File;
@@ -69,6 +69,18 @@ public class LoginProcess implements Initializable {
      */
     @FXML
     private void loginOperation(ActionEvent event) {
+        // notify user when a field is empty
+        if (this.id_input.getText().isEmpty() || passwordValue().isEmpty()){
+            Border error_border = new Border(new BorderStroke(Color.RED, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT));
+
+            if (this.id_input.getText().isEmpty()) this.id_input.setBorder(error_border);
+            if (passwordValue().isEmpty()){
+                this.pass_input.setBorder(error_border);
+                this.pass_input_show.setBorder(error_border);
+            }
+            return;
+        }
+
         // if the user is listed and the password was changed
         if (isUserListed(this.id_input.getText(), passwordValue()) && !passwordValue().equals(this.id_input.getText())) {
             // close the login stage
@@ -89,13 +101,10 @@ public class LoginProcess implements Initializable {
                 result.ifPresent(res -> {
                     if (result.get() == forgot_password) {
                         Alert inform = new Alert(Alert.AlertType.INFORMATION);
-                        inform.setTitle("Notify the Developer.");
-                        inform.setHeaderText("Request for a password change.");
+                        inform.setTitle("Request for a Password Change");
+                        inform.setHeaderText("Notify the Developer/Admin");
                         inform.setContentText("Please email c6918434@gmail.com your Student ID and request for password change. Thank You");
                         inform.showAndWait();
-                        connection_error.close();
-                    } else {
-                        connection_error.close();
                     }
                 });
                 return;
@@ -108,7 +117,7 @@ public class LoginProcess implements Initializable {
                 ButtonType no = new ButtonType("No", ButtonBar.ButtonData.NO);
                 Alert pass_not_changed = new Alert(Alert.AlertType.CONFIRMATION,
                         "Please change your password for better security.", yes, no);
-                pass_not_changed.setTitle("Original Password still active.");
+                pass_not_changed.setTitle("Original Password still active");
                 pass_not_changed.setHeaderText("You haven't changed your password. Do you want to change it now?");
                 Optional<ButtonType> result = pass_not_changed.showAndWait();
                 result.ifPresent(res -> {
@@ -152,13 +161,12 @@ public class LoginProcess implements Initializable {
      */
     @FXML
     private void show_password_rbutton_clicked() {
+        pass_input.setVisible(!show_password_rbutton.isSelected());
+        pass_input_show.setVisible(show_password_rbutton.isSelected());
+
         if (show_password_rbutton.isSelected()) {
-            pass_input.setVisible(false);
-            pass_input_show.setVisible(true);
             pass_input_show.setText(pass_input.getText());
         } else {
-            pass_input.setVisible(true);
-            pass_input_show.setVisible(false);
             pass_input.setText(pass_input_show.getText());
         }
     }
@@ -183,8 +191,7 @@ public class LoginProcess implements Initializable {
             Stage main_stage = new Stage();
             main_stage.getIcons().add(new Image(new File("src/src/app-logo.jpg").toURI().toString()));
             main_stage.setResizable(false);
-            main_stage.setTitle("Contribution Payment System");
-            main_stage.getIcons().add(new Image(new File("src/src/app-logo.jpg").toURI().toString()));
+            main_stage.setTitle("Student Contribution Payment System");
 
             if (user_position.equals("Classroom Representative")) {
                 // initialize the loader
@@ -240,10 +247,10 @@ public class LoginProcess implements Initializable {
      * @return true if the user is listed in the database, false otherwise.
      */
     private boolean isUserListed(String id_number, String password) {
-        String recorded_pass = null;
+        String recorded_pass;
         try {
             // fetch the password from the database
-            String check_query = "SELECT `password` FROM users WHERE `user_id` = '" + id_number + "';";
+            String check_query = "SELECT `password` FROM `users` WHERE `user_id` = '" + id_number + "';";
             PreparedStatement check_user_info = LoginProcess.connect.prepareStatement(check_query);
             ResultSet result = check_user_info.executeQuery();
             if (result.next())
@@ -270,8 +277,8 @@ public class LoginProcess implements Initializable {
         String user_position = "";
         try {
             // fetch the position of the user from the database
-            String position_query = "SELECT `position` FROM `manages` WHERE `officer_id` = '"
-                    + id_input.getText() + "';";
+            String position_query = "SELECT `position` FROM `manages` "
+                    + "WHERE `officer_id` = '" + id_input.getText() + "';";
             PreparedStatement check_user_position = connect.prepareStatement(position_query);
             ResultSet result = check_user_position.executeQuery();
             if (result.next())

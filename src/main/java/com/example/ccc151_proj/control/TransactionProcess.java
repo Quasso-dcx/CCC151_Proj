@@ -2,6 +2,7 @@ package com.example.ccc151_proj.control;
 
 import com.example.ccc151_proj.model.DataManager;
 import com.example.ccc151_proj.model.StudentPaymentInfo;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -22,9 +23,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.net.URL;
 import java.sql.*;
-import java.util.ResourceBundle;
 
 /**
  * For recording transactions.
@@ -32,13 +31,9 @@ import java.util.ResourceBundle;
 public class TransactionProcess {
     private static Connection connect;
     @FXML
-    private URL location;
-    @FXML
-    private ResourceBundle resources;
-    @FXML
     private AnchorPane transaction_scene;
     @FXML
-    private TextField transaction_label;
+    private Label transaction_label;
     @FXML
     private TextField transaction_payer_id;
     @FXML
@@ -92,25 +87,18 @@ public class TransactionProcess {
         // get the amount
         try {
             Connection connect = DataManager.getConnect();
-            String amount_query = "SELECT `amount` FROM `contributions` WHERE `contribution_code` = '" + this.contribution_code + "';";
+            String amount_query = "SELECT `amount` "
+                    + "FROM `contributions` "
+                    + "WHERE `contribution_code` = '" + contribution_code + "';";
             PreparedStatement get_amount = connect.prepareStatement(amount_query);
             ResultSet result_id = get_amount.executeQuery();
             result_id.next();
             String amount = result_id.getString("amount");
             transaction_amount.setText(amount);
-            result_id.close();
+            get_amount.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-
-        // add the year levels
-        ObservableList<String> year_levels = FXCollections.observableArrayList();
-        year_levels.add("1st Year");
-        year_levels.add("2nd Year");
-        year_levels.add("3rd Year");
-        year_levels.add("4th Year");
-        transaction_payer_year.setItems(year_levels);
-        transaction_payer_year.getSelectionModel().select(payer.getYear_level());
 
         // add the modes of payment
         ObservableList<String> modes = FXCollections.observableArrayList();
@@ -119,7 +107,6 @@ public class TransactionProcess {
         modes.add("Others");
         transaction_payment_mode.setItems(modes);
         transaction_payment_mode.getSelectionModel().selectFirst();
-        add_receipt_button.setDisable(true);
 
         // disable the receipt input if the mode is Cash
         transaction_payment_mode.getSelectionModel().selectedItemProperty().addListener((options, oldValue, newValue) -> {
@@ -170,13 +157,13 @@ public class TransactionProcess {
                 ResultSet result_id = get_transaction_id.executeQuery();
                 result_id.next();
                 String transaction_id = result_id.getString("transaction_id");
-                result_id.close();
+                get_transaction_id.close();
 
                 Alert success_transaction = new Alert(Alert.AlertType.INFORMATION);
                 success_transaction.setTitle("Transaction Successful");
                 success_transaction.setHeaderText(null);
-                success_transaction.setContentText("Transaction Successful (with Transaction ID = " + transaction_id + ") for Student " + payer.getId_number() +
-                        ". Please wait for verification from the BUFICOM Officers. Thank you.");
+                success_transaction.setContentText("Transaction Successful (with Transaction ID = " + transaction_id + ") for Student " + payer.getId_number() + ". "
+                        + "Please wait for verification from the BUFICOM Officers. Thank you.");
                 success_transaction.showAndWait();
             } catch (SQLException e) {
                 throw new RuntimeException(e);
@@ -319,12 +306,18 @@ public class TransactionProcess {
      * @param payer
      */
     public void setPayer(StudentPaymentInfo payer) {
-        transaction_payer_id.setText(payer.getId_number());
-        transaction_payer_name.setText(payer.getLast_name() + ", "
-                + payer.getFirst_name() + " "
-                + payer.getMiddle_name() + " "
-                + payer.getSuffix_name());
         this.payer = payer;
+
+        transaction_payer_id.setText(this.payer.getId_number());
+        transaction_payer_name.setText(this.payer.getLast_name() + ", "
+                + this.payer.getFirst_name() + " "
+                + this.payer.getMiddle_name() + " "
+                + this.payer.getSuffix_name());
+
+        ObservableList<String> year_levels = FXCollections.observableArrayList();
+        year_levels.add(this.payer.getYear_level());
+        transaction_payer_year.setItems(year_levels);
+        transaction_payer_year.getSelectionModel().selectFirst();
     }
 
     public String getAcademic_year() {

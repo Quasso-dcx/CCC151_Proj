@@ -10,6 +10,7 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -21,12 +22,11 @@ import javafx.stage.Stage;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ResourceBundle;
+import java.util.Optional;
 
 /**
  * Facilitates the process of the Class Rep frame.
@@ -34,23 +34,23 @@ import java.util.ResourceBundle;
 public class ClassRepControl {
     private static Connection connect;
     @FXML
-    private URL location;
-    @FXML
-    private ResourceBundle resources;
-    @FXML
     private TextField user_position;
     @FXML
     private ImageView user_image;
     @FXML
     private TextField user_name;
     @FXML
-    private TextField user_id;
-    @FXML
-    private TextField user_year_level;
-    @FXML
-    private TextField user_program;
-    @FXML
     private TextField org_code;
+    @FXML
+    private TextField block_code;
+    @FXML
+    private TextField paid_students1;
+    @FXML
+    private TextField paid_students2;
+    @FXML
+    private TextField money_collected1;
+    @FXML
+    private TextField money_collected2;
     @FXML
     private TextField contribution_info;
     @FXML
@@ -84,6 +84,8 @@ public class ClassRepControl {
     @FXML
     private TextField search_id;
     @FXML
+    private Button search_button;
+    @FXML
     private MenuItem show_first_sem_transaction;
     @FXML
     private MenuItem show_second_sem_transaction;
@@ -110,7 +112,7 @@ public class ClassRepControl {
 
         // just use this default photo because we don't have enough time to implement
         // changing of profile. Bitaw kapoy na :<<
-        File file = new File("src/src/default-user-image.jpg");
+        File file = new File("src/main/resources/Image/profile (1).png");
         Image image = new Image(file.toURI().toString());
         user_image.setImage(image);
 
@@ -119,12 +121,91 @@ public class ClassRepControl {
         String user_full_name = user.getFirst_name() + " " + user.getMiddle_name() + " " + user.getLast_name() + " "
                 + user.getSuffix_name();
         user_name.setText(user_full_name);
-        user_id.setText(user.getId_number());
-        user_year_level.setText(user.getYear_level());
-        user_program.setText(user.getProgram_code());
-
+        user_name.setTooltip(new Tooltip(user.getId_number()));
+        block_code.setText(user.getProgram_code() + "-" + user.getYear_level().charAt(0));
         // display the society first
         setupData(user.getSociety_code());
+
+        //search id setup
+        searchSetup();
+    }
+
+    /**
+     * Enable the search button when an input is provided in the textfield.
+     */
+    private void searchSetup(){
+        search_id.textProperty().addListener((ov, t, textField) -> {
+            if(textField.isEmpty()){
+                search_button.setDisable(true);
+                resetSearch();
+            } else{
+                search_button.setDisable(false);
+            }
+        });
+    }
+
+    private void getStatistics(){
+        try {
+            String students_paid_1_query = "SELECT COUNT(p.`status`) AS `Students Paid` FROM `pays` AS p LEFT JOIN `students` AS s ON p.`payer_id` = s.`id_number` "
+                    + "WHERE p.`contribution_code` = '" + contribution_data_table.getItems().get(0).getContribution_code() + "' "
+                    + "AND s.`program_code` = '" + user.getProgram_code() + "' "
+                    + "AND s.`year_level` = '" + user.getYear_level() + "' "
+                    + "AND p.`status` = 'Accepted';";
+            PreparedStatement get_students_paid_1 = connect.prepareStatement(students_paid_1_query);
+            ResultSet result = get_students_paid_1.executeQuery();
+            int student_paid_1_count = 0;
+            if (result.next()){
+                student_paid_1_count += result.getInt("Students Paid");
+            }
+
+            String students_total_1_query = "SELECT COUNT(`id_number`) AS `Students Total` FROM `students` " +
+                    "WHERE `program_code` = '" + user.getProgram_code() + "' " +
+                    "AND `year_level` = '" + user.getYear_level() + "';";
+
+            PreparedStatement get_students_total_1 = connect.prepareStatement(students_total_1_query);
+            result = get_students_total_1.executeQuery();
+            int student_total_1_count = 0;
+            if (result.next()){
+                student_total_1_count += result.getInt("Students Total");
+            }
+
+            paid_students1.setText(student_paid_1_count + " out of " + student_total_1_count);
+            money_collected1.setText("Php " + student_paid_1_count*contribution_data_table.getItems().get(0).getContribution_amount());
+            get_students_paid_1.close();
+            get_students_total_1.close();
+
+            String students_paid_2_query = "SELECT COUNT(p.`status`) AS `Students Paid` FROM `pays` AS p LEFT JOIN `students` AS s ON p.`payer_id` = s.`id_number` "
+                    + "WHERE p.`contribution_code` = '" + contribution_data_table.getItems().get(1).getContribution_code() + "' "
+                    + "AND s.`program_code` = '" + user.getProgram_code() + "' "
+                    + "AND s.`year_level` = '" + user.getYear_level() + "' "
+                    + "AND p.`status` = 'Accepted';";
+
+            PreparedStatement get_students_paid_2 = connect.prepareStatement(students_paid_2_query);
+            result = get_students_paid_2.executeQuery();
+            int student_paid_2_count = 0;
+            if (result.next()){
+                student_paid_2_count += result.getInt("Students Paid");
+            }
+
+            String students_total_2_query = "SELECT COUNT(`id_number`) AS `Students Total` FROM `students` " +
+                    "WHERE `program_code` = '" + user.getProgram_code() + "' " +
+                    "AND `year_level` = '" + user.getYear_level() + "';";
+
+            PreparedStatement get_students_total_2 = connect.prepareStatement(students_total_2_query);
+            result = get_students_total_2.executeQuery();
+            int student_total_2_count = 0;
+            if (result.next()){
+                student_total_2_count += result.getInt("Students Total");
+            }
+
+            paid_students2.setText(student_paid_2_count + " out of " + student_total_2_count);
+            money_collected2.setText("Php " + student_paid_2_count*contribution_data_table.getItems().get(1).getContribution_amount());
+
+            get_students_paid_2.close();
+            get_students_total_2.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -135,8 +216,7 @@ public class ClassRepControl {
     private void getUserData(String user_id_number) {
         try {
             // set up the query
-            String user_data_query = "SELECT `first_name`, `middle_name`, `last_name`, `suffix_name`, `user_id`, "
-                    + "`year_level`, `program_code`, `position`, `organization_code` "
+            String user_data_query = "SELECT `first_name`, `middle_name`, `last_name`, `suffix_name`, `user_id`, `year_level`, `program_code`, `position`, `organization_code` "
                     + "FROM `users` AS u LEFT JOIN `students` AS s ON u.`user_id` = s.`id_number` "
                     + "LEFT JOIN `manages` AS o ON u.`user_id` = o.`officer_id` "
                     + "WHERE `user_id` = '" + user_id_number + "';";
@@ -157,7 +237,7 @@ public class ClassRepControl {
             String position_data = result.getString("position");
             String ec_org_code = result.getString("organization_code");
             /*
-             * since a classroom rep can collect up to 2 contribution from 2 different
+             * Since a classroom rep can collect up to 2 contribution from 2 different
              * organizations, get the second one also.
              */
             result.next();
@@ -189,9 +269,11 @@ public class ClassRepControl {
         // fetch the data from the database then store here
         ObservableList<ContributionProperties> contributions_list = FXCollections.observableArrayList();
         try {
-            String user_data_query = "SELECT `contribution_code`, `semester`,`amount` FROM `contributions` WHERE `academic_year` = '"
-                    + academic_year + "' AND `collecting_org_code` = '" + org_code.getText()
-                    + "' ORDER BY `contribution_code` ASC;";
+            String user_data_query = "SELECT `contribution_code`, `semester`,`amount` "
+                    + "FROM `contributions` "
+                    + "WHERE `academic_year` = '" + academic_year + "' "
+                    + "AND `collecting_org_code` = '" + org_code.getText() + "' "
+                    + "ORDER BY `contribution_code` ASC;";
 
             PreparedStatement get_contributions_data = connect.prepareStatement(user_data_query);
             ResultSet result = get_contributions_data.executeQuery();
@@ -225,12 +307,15 @@ public class ClassRepControl {
 
         setupContributionsData();
         setupStudentsData();
+        getStatistics();
     }
 
     /**
      * Set up the contribution data.
      */
     private void setupContributionsData() {
+        contribution_data_table.getItems().clear();
+
         // set up then display the data to the contribution table
         code_column.setCellValueFactory(new PropertyValueFactory<>("contribution_code"));
         sem_column.setCellValueFactory(new PropertyValueFactory<>("contribution_sem"));
@@ -238,6 +323,7 @@ public class ClassRepControl {
         code_column.setStyle("-fx-alignment: CENTER;");
         sem_column.setStyle("-fx-alignment: CENTER;");
         amount_column.setStyle("-fx-alignment: CENTER;");
+
         ObservableList<ContributionProperties> contributions_data = getContributions();
         contribution_data_table.setItems(contributions_data);
     }
@@ -262,6 +348,7 @@ public class ClassRepControl {
         last_name_column.setStyle("-fx-alignment: CENTER;");
         first_sem_column.setStyle("-fx-alignment: CENTER;");
         second_sem_column.setStyle("-fx-alignment: CENTER;");
+
         ObservableList<StudentPaymentInfo> details_students = getPayersList(null);
         student_data_table.setItems(details_students);
     }
@@ -276,15 +363,15 @@ public class ClassRepControl {
         ObservableList<StudentPaymentInfo> member_list = FXCollections.observableArrayList();
         String members_data_query;
         if (id_number_search == null) {
-            // get the list of every member in the organization since there is no id
-            // specified
+            // get the list of every member in the organization since there is no id specified
             members_data_query = "SELECT `id_number`, `first_name`,`middle_name`, `last_name`, `suffix_name`, `year_level` "
                     + "FROM `members` AS m LEFT JOIN `students` AS s ON m.`member_id` = s.`id_number` "
                     + "WHERE m.`organization_code` = '" + org_code.getText() + "' "
-                    + "AND s.`program_code` = '" + user.getProgram_code()
-                    + "' " + "AND s.`year_level` = '" + user.getYear_level() + "' "
+                    + "AND s.`program_code` = '" + user.getProgram_code() + "' "
+                    + "AND s.`year_level` = '" + user.getYear_level() + "' "
                     + "ORDER BY `last_name` ASC, `first_name` ASC, `middle_name` ASC;";
         } else {
+            // get the list of the students with similar pattern of the searched ID
             members_data_query = "SELECT `id_number`, `first_name`,`middle_name`, `last_name`, `suffix_name`, `year_level` "
                     + "FROM `members` AS m LEFT JOIN `students` AS s ON m.`member_id` = s.`id_number` "
                     + "WHERE m.`organization_code` = '" + org_code.getText() + "' "
@@ -306,7 +393,7 @@ public class ClassRepControl {
                 String year_level = result.getString("year_level");
 
                 /*
-                 * set the initial status to Not Paid in case there are no data to be fetched
+                 * Set the initial status to Not Paid in case there are no data to be fetched
                  * since there was no transaction made still
                  */
                 String first_sem_status = "Not Paid";
@@ -332,7 +419,7 @@ public class ClassRepControl {
                             default -> result_2.getString("status");
                         };
                     }
-                    result_2.close();
+                    get_payment_status.close();
                 }
 
                 if (contribution_data_table.getItems().get(1).getContribution_amount() <= 0) {
@@ -351,7 +438,7 @@ public class ClassRepControl {
                             default -> result_2.getString("status");
                         };
                     }
-                    result_2.close();
+                    get_payment_status.close();
                 }
 
                 member_list.add(new StudentPaymentInfo(id_number, first_name, middle_name, last_name, suffix_name,
@@ -366,28 +453,36 @@ public class ClassRepControl {
 
     /**
      * Display the data for ec contributions.
-     *
-     * @param event
      */
     @FXML
-    private void ec_button_clicked(ActionEvent event) {
-        ec_button.setDisable(true);
-        society_button.setDisable(false);
+    private void ec_button_clicked() {
+        currentlyDisplayed(ec_button);
         resetSearch();
         setupData(user.getEc_code());
     }
 
     /**
      * Display the data for society contributions.
-     *
-     * @param event
      */
     @FXML
-    private void society_button_clicked(ActionEvent event) {
-        ec_button.setDisable(false);
-        society_button.setDisable(true);
+    private void society_button_clicked() {
+        currentlyDisplayed(society_button);
         resetSearch();
         setupData(user.getSociety_code());
+    }
+
+    /**
+     * Change the appearance of the buttons based on the clicked button.
+     *
+     * @param clicked
+     */
+    private void currentlyDisplayed(Button clicked){
+        ec_button.setDisable(false);
+        ec_button.setUnderline(false);
+        society_button.setDisable(false);
+        society_button.setUnderline(false);
+        clicked.setDisable(true);
+        clicked.setUnderline(true);
     }
 
     /**
@@ -468,7 +563,7 @@ public class ClassRepControl {
             Alert non_selected = new Alert(Alert.AlertType.INFORMATION);
             non_selected.setTitle("Contribution Not Payable");
             non_selected.setHeaderText(null);
-            non_selected.setContentText("Contribution is not being collected. Amount = 0.");
+            non_selected.setContentText("Contribution is not being collected (amount = 0).");
             non_selected.showAndWait();
         }
     }
@@ -486,7 +581,7 @@ public class ClassRepControl {
             if (payer.getSecond_sem_status().equals("Paid")) {
                 // if the payer already paid
                 Alert non_selected = new Alert(Alert.AlertType.INFORMATION);
-                non_selected.setTitle("Student Already Paid.");
+                non_selected.setTitle("Student Already Paid");
                 non_selected.setHeaderText(null);
                 non_selected.setContentText("Student Already Paid. Select another student.");
                 non_selected.showAndWait();
@@ -551,7 +646,7 @@ public class ClassRepControl {
             Alert non_selected = new Alert(Alert.AlertType.INFORMATION);
             non_selected.setTitle("Contribution Not Payable");
             non_selected.setHeaderText(null);
-            non_selected.setContentText("Contribution is not being collected. Amount = 0.");
+            non_selected.setContentText("Contribution is not being collected (amount = 0).");
             non_selected.showAndWait();
         }
     }
@@ -561,16 +656,8 @@ public class ClassRepControl {
      */
     @FXML
     private void searchID() {
-        if (!search_id.getText().isEmpty()) {
-            ObservableList<StudentPaymentInfo> member_list = getPayersList(search_id.getText());
-            student_data_table.setItems(member_list);
-        } else {
-            Alert success_transaction = new Alert(Alert.AlertType.ERROR);
-            success_transaction.setTitle("Empty ID");
-            success_transaction.setHeaderText(null);
-            success_transaction.setContentText("Please Input ID Number.");
-            success_transaction.showAndWait();
-        }
+        ObservableList<StudentPaymentInfo> member_list = getPayersList(search_id.getText());
+        student_data_table.setItems(member_list);
     }
 
     /**
@@ -590,12 +677,42 @@ public class ClassRepControl {
     @FXML
     private void setupContextMenu() {
         StudentPaymentInfo student_selected = student_data_table.getSelectionModel().getSelectedItem();
-        if (student_selected == null) {
-            show_first_sem_transaction.setDisable(true);
-            show_second_sem_transaction.setDisable(true);
-        } else {
-            show_first_sem_transaction.setDisable(student_selected.getFirst_sem_status().equals("Not Paid"));
-            show_second_sem_transaction.setDisable(student_selected.getSecond_sem_status().equals("Not Paid"));
-        }
+        boolean disable_first_menu = (student_selected == null) || (student_selected.getFirst_sem_status().equals("Not Paid"));
+        boolean disable_second_menu = (student_selected == null) || (student_selected.getSecond_sem_status().equals("Not Paid"));
+        show_first_sem_transaction.setDisable(disable_first_menu);
+        show_second_sem_transaction.setDisable(disable_second_menu);
+    }
+
+    /**
+     * Log out process.
+     *
+     * @param event
+     */
+    @FXML
+    private void logout_button_clicked(ActionEvent event){
+        Alert logout_confirmation = new Alert(Alert.AlertType.CONFIRMATION);
+        logout_confirmation.setTitle("Logout Confirmation");
+        logout_confirmation.setHeaderText("Logging out");
+        logout_confirmation.setContentText("Are you sure?");
+        Optional<ButtonType> decision = logout_confirmation.showAndWait();
+        decision.ifPresent(choice -> {
+            if (decision.get() == ButtonType.OK){
+                ((Stage) ((Node) event.getSource()).getScene().getWindow()).close();
+                try {
+                    Stage login_stage = new Stage();
+                    login_stage.getIcons().add(new Image(new File("src/src/app-logo.jpg").toURI().toString()));
+
+                    //starts with the login scene
+                    FXMLLoader login_view = new FXMLLoader(Main.class.getResource("login-frame.fxml"));
+                    Scene login_scene = new Scene(login_view.load());
+                    login_stage.setTitle("Login");
+                    login_stage.setScene(login_scene);
+                    login_stage.setResizable(false);
+                    login_stage.show();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
     }
 }

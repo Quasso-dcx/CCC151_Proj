@@ -61,6 +61,8 @@ public class StudentsRecordsControl {
     @FXML
     private TextField search_id;
     @FXML
+    private Button search_student_button;
+    @FXML
     private MenuItem show_first_sem_transaction;
     @FXML
     private MenuItem show_second_sem_transaction;
@@ -87,6 +89,21 @@ public class StudentsRecordsControl {
         setupSearchBlock();
         setupContributionsData();
         setupStudentsData(getPayersList(null, null, null));
+        searchSetup();
+    }
+
+    /**
+     * Enable the search button when an input is provided in the textfield.
+     */
+    private void searchSetup(){
+        search_id.textProperty().addListener((ov, t, textField) -> {
+            if(textField.isEmpty()){
+                search_student_button.setDisable(true);
+                resetSearch();
+            } else{
+                search_student_button.setDisable(false);
+            }
+        });
     }
 
     /**
@@ -515,6 +532,7 @@ public class StudentsRecordsControl {
         program_code_combobox.getSelectionModel().selectFirst();
         year_level_combobox.getSelectionModel().selectFirst();
         setupContributionsData();
+
         ObservableList<StudentPaymentInfo> details_students = getPayersList(null, null, null);
         student_data_table.setItems(details_students);
     }

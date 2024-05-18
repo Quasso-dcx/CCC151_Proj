@@ -34,6 +34,8 @@ public class TransactionHistoryControl {
     @FXML
     private TextField search_id_textfield;
     @FXML
+    private Button search_student_button;
+    @FXML
     private ComboBox<String> contribution_code_combobox;
     @FXML
     private TableView<UnverifiedPayment> unverified_payments_table;
@@ -63,6 +65,21 @@ public class TransactionHistoryControl {
         setupContributions();
         displayPayments();
         setupSearchBlock();
+        searchSetup();
+    }
+
+    /**
+     * Enable the search button when an input is provided in the textfield.
+     */
+    private void searchSetup(){
+        search_id_textfield.textProperty().addListener((ov, t, textField) -> {
+            if(textField.isEmpty()){
+                search_student_button.setDisable(true);
+                refresh_button_clicked();
+            } else{
+                search_student_button.setDisable(false);
+            }
+        });
     }
 
     /**
@@ -71,8 +88,8 @@ public class TransactionHistoryControl {
     private void setupContributions(){
         try {
             String contribution_code_query = "SELECT `contribution_code` FROM `contributions` "
-                    + "WHERE `collecting_org_code` = '" + this.org_code
-                    + "' AND `academic_year` = '" + this.academic_year + "';";
+                    + "WHERE `collecting_org_code` = '" + this.org_code + "' "
+                    + "AND `academic_year` = '" + this.academic_year + "';";
             PreparedStatement get_contribution_code = connect.prepareStatement(contribution_code_query);
             ResultSet result = get_contribution_code.executeQuery();
             ObservableList<String> contribution_list = FXCollections.observableArrayList();

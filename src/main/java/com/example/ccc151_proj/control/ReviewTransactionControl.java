@@ -1,6 +1,7 @@
 package com.example.ccc151_proj.control;
 
 import com.example.ccc151_proj.model.DataManager;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -8,10 +9,7 @@ import javafx.fxml.FXML;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Hyperlink;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.Modality;
@@ -27,7 +25,7 @@ import java.sql.*;
 public class ReviewTransactionControl {
     private static Connection connect;
     @FXML
-    private TextField transaction_label;
+    private Label transaction_label;
     @FXML
     private TextField transaction_payer_id;
     @FXML
@@ -87,10 +85,12 @@ public class ReviewTransactionControl {
             transaction_id.setText(result.getString("transaction_id"));
             transaction_datetime.setText(result.getTimestamp("transaction_datetime").toString());
             transaction_amount.setText(result.getString("amount"));
+
             ObservableList<String> payment_mode = FXCollections.observableArrayList();
             payment_mode.add(result.getString("payment_mode"));
             transaction_payment_mode.setItems(payment_mode);
             transaction_payment_mode.getSelectionModel().selectFirst();
+
             // disable the hyperlink if the payment mode is cash
             receipt_link.setDisable(transaction_payment_mode.getValue().equals("Cash"));
             if (transaction_payment_mode.getValue().equals("Cash"))
@@ -103,7 +103,9 @@ public class ReviewTransactionControl {
                     viewReceipt(receipt_image);
                 });
             }
+
             transaction_status.setText(result.getString("status"));
+
             // display the transaction comments if there is any
             String transaction_message = result.getString("transaction_message");
             if (!result.wasNull())

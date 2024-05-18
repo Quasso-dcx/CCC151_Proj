@@ -7,13 +7,15 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class AddContributionControl {
+public class EditContributionControl {
     private static Connection connect;
     private String org_code;
     private String academic_year;
@@ -38,7 +40,7 @@ public class AddContributionControl {
     @FXML
     private Button edit_contribution_button;
 
-    public AddContributionControl() {
+    public EditContributionControl() {
     }
 
     /**
@@ -52,11 +54,13 @@ public class AddContributionControl {
 
         organization_code_textfield.setText(this.org_code);
         academic_year_textfield.setText(this.academic_year);
+
         ObservableList<String> semester_list = FXCollections.observableArrayList();
         semester_list.add("1");
         semester_list.add("2");
         semester_combobox.setItems(semester_list);
         semester_combobox.getSelectionModel().selectFirst();
+
         ObservableList<ContributionProperties> contribution_list = FXCollections.observableArrayList();
         try {
             String contribution_info_query = "SELECT `contribution_code`, `semester`, `amount` FROM `contributions` "
@@ -91,6 +95,7 @@ public class AddContributionControl {
         academic_year_column.setStyle("-fx-alignment: CENTER;");
         sem_column.setStyle("-fx-alignment: CENTER;");
         amount_column.setStyle("-fx-alignment: CENTER;");
+
         contribution_data_table.setOnMouseClicked(event -> {
             // Make sure the user clicked on a populated item
             ContributionProperties contribution = contribution_data_table.getSelectionModel().getSelectedItem();
@@ -122,17 +127,23 @@ public class AddContributionControl {
      */
     @FXML
     private void edit_contribution_button_clicked() {
-        try {
-            String edit_contribution_query = "UPDATE `contributions` SET `semester` = ?, `amount` = ? WHERE `contribution_code` = ?;";
-            PreparedStatement edit_contribution = connect.prepareStatement(edit_contribution_query);
-            edit_contribution.setString(1, semester_combobox.getValue());
-            edit_contribution.setInt(2, Integer.parseInt(amount_textfield.getText()));
-            edit_contribution.setString(3, contribution_data_table.getSelectionModel().getSelectedItem().getContribution_code());
-            edit_contribution.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+        if (!amount_textfield.getText().isEmpty()){
+            try {
+                String edit_contribution_query = "UPDATE `contributions` SET `semester` = ?, `amount` = ? WHERE `contribution_code` = ?;";
+                PreparedStatement edit_contribution = connect.prepareStatement(edit_contribution_query);
+                edit_contribution.setString(1, semester_combobox.getValue());
+                edit_contribution.setInt(2, Integer.parseInt(amount_textfield.getText()));
+                edit_contribution.setString(3, contribution_data_table.getSelectionModel().getSelectedItem().getContribution_code());
+                edit_contribution.executeUpdate();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+            initialize(this.org_code);
+            clear_selection_button_clicked();
+        } else {
+            Border error_border = new Border(new BorderStroke(Color.RED, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT));
+            amount_textfield.setBorder(error_border);
         }
-        initialize(this.org_code);
-        clear_selection_button_clicked();
+
     }
 }

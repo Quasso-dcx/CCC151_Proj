@@ -2,14 +2,15 @@ package com.example.ccc151_proj.control;
 
 import com.example.ccc151_proj.Main;
 import com.example.ccc151_proj.model.DataManager;
+
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
@@ -23,6 +24,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Optional;
 
 /**
  * Facilitates the process of the BUFICOM frame.
@@ -61,18 +63,39 @@ public class BuficomInfoControl {
 
         // just use this default photo because we don't have enough time to implement
         // changing of profile. Bitaw kapoy na :<<
-        File file = new File("src/src/default-org-logo.jpg");
+        File file = new File("src/main/resources/Image/profile (1).png");
         Image image = new Image(file.toURI().toString());
         org_image.setImage(image);
 
         connect = DataManager.getConnect();
         this.user_id_number = user_id_number;
         user_position_textfield.setText(user_position);
+        user_position_textfield.setTooltip(new Tooltip(this.user_id_number));
         getUserOrgInfo();
     }
 
+    /**
+     * Get the organization code of the user.
+     * @return organization_code
+     */
     public String getOrg_code() {
         return org_code_textfield.getText();
+    }
+
+    /**
+     * Change the appearance of the buttons based on the clicked button.
+     *
+     * @param clicked
+     */
+    private void currentlyDisplayed(Button clicked){
+        verify_payments_button.setDisable(false);
+        verify_payments_button.setUnderline(false);
+        transaction_history_button.setDisable(false);
+        transaction_history_button.setUnderline(false);
+        students_records_button.setDisable(false);
+        students_records_button.setUnderline(false);
+        clicked.setDisable(true);
+        clicked.setUnderline(true);
     }
 
     /**
@@ -80,9 +103,7 @@ public class BuficomInfoControl {
      */
     @FXML
     private void verify_payments_clicked() {
-        verify_payments_button.setDisable(true);
-        transaction_history_button.setDisable(false);
-        students_records_button.setDisable(false);
+        currentlyDisplayed(verify_payments_button);
         ObservableList<Node> children = parent.getChildren();
         parent.getChildren().remove(children.get(1));
         try {
@@ -102,9 +123,7 @@ public class BuficomInfoControl {
      */
     @FXML
     private void transaction_history_clicked() {
-        verify_payments_button.setDisable(false);
-        transaction_history_button.setDisable(true);
-        students_records_button.setDisable(false);
+        currentlyDisplayed(transaction_history_button);
         ObservableList<Node> children = parent.getChildren();
         parent.getChildren().remove(children.get(1));
         try {
@@ -124,9 +143,7 @@ public class BuficomInfoControl {
      */
     @FXML
     private void students_records_clicked() {
-        verify_payments_button.setDisable(false);
-        transaction_history_button.setDisable(false);
-        students_records_button.setDisable(true);
+        currentlyDisplayed(students_records_button);
         ObservableList<Node> children = parent.getChildren();
         parent.getChildren().remove(children.get(1));
         try {
@@ -150,18 +167,18 @@ public class BuficomInfoControl {
             Stage add_contribution_stage = new Stage();
             add_contribution_stage.getIcons().add(new Image(new File("src/src/app-logo.jpg").toURI().toString()));
             add_contribution_stage.setResizable(false);
+            add_contribution_stage.setTitle("Edit Contributions");
 
             add_contribution_stage.initModality(Modality.APPLICATION_MODAL);
             FXMLLoader add_contribution_loader = new FXMLLoader(
-                    Main.class.getResource("BUFICOM-FRAMES/add-contribution-form.fxml"));
-            Parent add_contribution_parent = add_contribution_loader.load();
-            AddContributionControl add_contribution_control = add_contribution_loader.getController();
+                    Main.class.getResource("BUFICOM-FRAMES/edit-contribution-form.fxml"));
+            Parent edit_contribution_parent = add_contribution_loader.load();
+            EditContributionControl add_contribution_control = add_contribution_loader.getController();
             add_contribution_control.initialize(org_code_textfield.getText());
 
-            Scene add_contribution_scene = new Scene(add_contribution_parent);
+            Scene add_contribution_scene = new Scene(edit_contribution_parent);
             add_contribution_stage.setScene(add_contribution_scene);
             add_contribution_stage.show();
-
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -172,18 +189,46 @@ public class BuficomInfoControl {
      */
     private void getUserOrgInfo() {
         try {
-            String org_code_query = "SELECT * FROM `manages` AS m LEFT JOIN `organizations` AS o "
-                    + "ON m.`organization_code` = o.`organization_code`\n"
+            String org_code_query = "SELECT m.`organization_code`, o.`organization_name` FROM `manages` AS m LEFT JOIN `organizations` AS o "
+                    + "ON m.`organization_code` = o.`organization_code` "
                     + "WHERE `officer_id` =  '" + user_id_number + "';";
             PreparedStatement get_org_code = connect.prepareStatement(org_code_query);
             ResultSet result = get_org_code.executeQuery();
             if (result.next()) {
-                org_code_textfield.setText(result.getString(1));
+                org_code_textfield.setText(result.getString("organization_code"));
                 org_name_textfield.setText(result.getString("organization_name"));
             }
-            result.close();
+            get_org_code.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @FXML
+    private void logout_button_clicked(ActionEvent event){
+        Alert logout_confirmation = new Alert(Alert.AlertType.CONFIRMATION);
+        logout_confirmation.setTitle("Logout Confirmation");
+        logout_confirmation.setHeaderText("Logging out");
+        logout_confirmation.setContentText("Are you sure?");
+        Optional<ButtonType> decision = logout_confirmation.showAndWait();
+        decision.ifPresent(choice -> {
+            if (decision.get() == ButtonType.OK){
+                ((Stage) ((Node) event.getSource()).getScene().getWindow()).close();
+                try {
+                    Stage login_stage = new Stage();
+                    login_stage.getIcons().add(new Image(new File("src/src/app-logo.jpg").toURI().toString()));
+
+                    //starts with the login scene
+                    FXMLLoader login_view = new FXMLLoader(Main.class.getResource("login-frame.fxml"));
+                    Scene login_scene = new Scene(login_view.load());
+                    login_stage.setTitle("Login");
+                    login_stage.setScene(login_scene);
+                    login_stage.setResizable(false);
+                    login_stage.show();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
     }
 }

@@ -93,11 +93,10 @@ public class ChangePasswordControl {
                 password_changed.setHeaderText("Proceed to login?");
                 Optional<ButtonType> buttons = password_changed.showAndWait();
                 buttons.ifPresent(res -> {
+                    // close the login stage
+                    ((Stage) ((Node) event.getSource()).getScene().getWindow()).close();
                     if (buttons.get() == yes) {
                         try {
-                            // close the login stage
-                            ((Stage) ((Node) event.getSource()).getScene().getWindow()).close();
-
                             Stage login_stage = new Stage();
                             login_stage.setResizable(false);
                             login_stage.getIcons().add(new Image(new File("src/src/app-logo.jpg").toURI().toString()));
@@ -112,8 +111,6 @@ public class ChangePasswordControl {
                         } catch (IOException e) {
                             throw new RuntimeException(e);
                         }
-                    } else {
-                        System.exit(0);
                     }
                 });
             } catch (SQLException e) {

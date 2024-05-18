@@ -3,6 +3,7 @@ package com.example.ccc151_proj.control;
 import com.example.ccc151_proj.Main;
 import com.example.ccc151_proj.model.DataManager;
 import com.example.ccc151_proj.model.UnverifiedPayment;
+import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -33,6 +34,8 @@ public class VerifyPaymentsControl {
     private ComboBox<String> year_level_combobox;
     @FXML
     private TextField search_id_textfield;
+    @FXML
+    private Button search_student_button;
     @FXML
     private ComboBox<String> contribution_code_combobox;
     @FXML
@@ -68,6 +71,21 @@ public class VerifyPaymentsControl {
         setupContributions();
         displayPayments();
         setupSearchBlock();
+        searchSetup();
+    }
+
+    /**
+     * Enable the search button when an input is provided in the textfield.
+     */
+    private void searchSetup(){
+        search_id_textfield.textProperty().addListener((ov, t, textField) -> {
+            if(textField.isEmpty()){
+                search_student_button.setDisable(true);
+                refresh_button_clicked();
+            } else{
+                search_student_button.setDisable(false);
+            }
+        });
     }
 
     /**
@@ -237,6 +255,7 @@ public class VerifyPaymentsControl {
                         + "WHERE p.`payer_id` LIKE '%" + search_id_textfield.getText() + "%' "
                         + "AND p.`contribution_code` = '" + contribution_code_combobox.getSelectionModel().getSelectedItem() + "'\n"
                         + "AND p.`status` = 'Pending';";
+
                 PreparedStatement get_student_id = connect.prepareStatement(search_id_query);
                 ResultSet result = get_student_id.executeQuery();
                 while (result.next()) {

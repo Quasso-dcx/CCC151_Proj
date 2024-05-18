@@ -3,6 +3,8 @@ package com.example.ccc151_proj.control;
 import com.example.ccc151_proj.model.DataManager;
 import com.example.ccc151_proj.model.EmailSender;
 import com.example.ccc151_proj.model.UnverifiedPayment;
+import javafx.animation.PauseTransition;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -16,12 +18,7 @@ import javafx.scene.image.ImageView;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-import javax.activation.FileDataSource;
-import javax.sql.DataSource;
 import java.io.*;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.sql.*;
 import java.util.Optional;
 
@@ -31,7 +28,7 @@ import java.util.Optional;
 public class VerifyTransactionControl {
     private static Connection connect;
     @FXML
-    private TextField transaction_label;
+    private Label transaction_label;
     @FXML
     private TextField transaction_payer_id;
     @FXML
@@ -234,6 +231,13 @@ public class VerifyTransactionControl {
      * @param status
      */
     private void notifyPayer(String end_message, String status){
+        // alert the user so that they won't forcibly close the app in case of delay
+        Alert loading = new Alert(Alert.AlertType.INFORMATION);
+        loading.setContentText("Please Wait.");
+        loading.setHeaderText("The Verification Form will automatically close after sending the email.");
+        loading.setTitle("Sending Email...");
+        loading.showAndWait();
+
         try {
             // get the email address of the payer
             String payer_email_query = "SELECT `email` FROM `students` WHERE `id_number` = '" + transaction_payer_id.getText() + "';";
@@ -247,30 +251,101 @@ public class VerifyTransactionControl {
             String subject_message = "Payment for " + contribution_code_data[0] + " A.Y. " + contribution_code_data[1] + ", Semester " + contribution_code_data[2];
 
             // create the body of the message, along with the receipt photo if available
-            String receipt_id = " null ";
+            String receipt_id = " *null* ";
             File file = null;
             // since receipt photo is only available when payment mode isn't Cash
             if (!transaction_payment_mode.getValue().equals("Cash")){
-                receipt_id = "<img src=\"cid:image\">";     // html format for the image insertion
+                receipt_id = "<img height=\"300\" width=\"200\" src=\"cid:image\" >";     // html format for the image insertion
                 // create a temporary file where the receipt will be stored
                 file = File.createTempFile("temp_receipt", ".png");
                 // output the Blob from the database to the temporary file
                 FileOutputStream outputStream = new FileOutputStream(file);
                 outputStream.write(receipt_image.getBinaryStream().readAllBytes());
             }
-            String message_to_student = "<h1>Transaction Report </h1><br>" +
-                    "<b>Transaction ID </b> = " + transaction_id.getText() + "<br>" +
-                    "<b>Student ID </b> = " + transaction_payer_id.getText() + "<br>" +
-                    "<b>Student Name </b> = " + transaction_payer_name.getText() + "<br>" +
-                    "<b>Amount </b> = " + transaction_amount.getText() + "<br>" +
-                    "<b>Payment Mode </b> = " + transaction_payment_mode.getValue() + "<br>" +
-                    "<b>Receipt </b> = " + receipt_id + "<br>" +
-                    "<b>Status </b> = " + status + "<br>" +
-                    "<b>Comments </b> = " + transaction_comments.getText() + "<br><br><br>" +
-                    "<b><i>Remarks </i></b> :" + end_message + "<br>" +
-                    "-- " + contribution_code_data[0] + " BUFICOM :>";
 
-            EmailSender.sendEmail(payer_email, subject_message, message_to_student, file);
+            String message_to_student = "<html lang=\"en\">\n" +
+                    "<head>\n" +
+                    "    <meta charset=\"UTF-8\">\n" +
+                    "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n" +
+                    "    <title>Transaction Report</title>\n" +
+                    "    <style>\n" +
+                    "        body {\n" +
+                    "            font-family: Arial, sans-serif;\n" +
+                    "            line-height: 1.6;\n" +
+                    "            margin: 20px;\n" +
+                    "        }\n" +
+                    "        .transaction-table {\n" +
+                    "            width: 70%;\n" +
+                    "            border-collapse: collapse;\n" +
+                    "            margin-bottom: 20px;\n" +
+                    "        }\n" +
+                    "        .transaction-table, .transaction-table th, .transaction-table td {\n" +
+                    "            border: 2px solid #000;\n" +
+                    "        }\n" +
+                    "        .transaction-table th, .transaction-table td {\n" +
+                    "            padding: 10px;\n" +
+                    "            text-align: left;\n" +
+                    "        }\n" +
+                    "        .remarks {\n" +
+                    "            font-style: italic;\n" +
+                    "        }\n" +
+                    "    </style>\n" +
+                    "</head>\n" +
+                    "<body>\n" +
+                    "\n" +
+                    "<p>Dear " + transaction_payer_name.getText() + ",</p>\n" +
+                    "\n" +
+                    "<p>Please find below the details of your recent transaction:</p>\n" +
+                    "\n" +
+                    "<table class=\"transaction-table\">\n" +
+                    "    <tr>\n" +
+                    "        <th>FIELD</th>\n" +
+                    "        <th>DETAILS</th>\n" +
+                    "    </tr>\n" +
+                    "    <tr>\n" +
+                    "        <td>Transaction ID</td>\n" +
+                    "        <td>" + transaction_id.getText() + "</td>\n" +
+                    "    </tr>\n" +
+                    "    <tr>\n" +
+                    "        <td>Student ID</td>\n" +
+                    "        <td>" + transaction_payer_id.getText() + "</td>\n" +
+                    "    </tr>\n" +
+                    "    <tr>\n" +
+                    "        <td>Student Name</td>\n" +
+                    "        <td>" + transaction_payer_name.getText() + "</td>\n" +
+                    "    </tr>\n" +
+                    "    <tr>\n" +
+                    "        <td>Amount</td>\n" +
+                    "        <td>" + transaction_amount.getText() + "</td>\n" +
+                    "    </tr>\n" +
+                    "    <tr>\n" +
+                    "        <td>Payment Mode</td>\n" +
+                    "        <td>" + transaction_payment_mode.getValue() + "</td>\n" +
+                    "    </tr>\n" +
+                    "    <tr>\n" +
+                    "        <td>Receipt</td>\n" +
+                    "        <td>" + receipt_id + "</td>\n" +
+                    "    </tr>\n" +
+                    "    <tr>\n" +
+                    "        <td>Status</td>\n" +
+                    "        <td>" + status + "</td>\n" +
+                    "    </tr>\n" +
+                    "    <tr>\n" +
+                    "        <td>Comments</td>\n" +
+                    "        <td>" + transaction_comments.getText() + "</td>\n" +
+                    "    </tr>\n" +
+                    "</table>\n" +
+                    "\n" +
+                    "<p class=\"remarks\">" + end_message + "</p>\n" +
+                    "\n" +
+                    "<p>Best regards,<br>\n" +
+                    "<strong>"+ contribution_code_data[0] +" BUFICOM</strong></p>\n" +
+                    "\n" +
+                    "</body>";
+
+            EmailSender sender = new EmailSender(payer_email, subject_message, message_to_student, file);
+            Thread sender_thread = new Thread(sender);
+            sender_thread.start();
         } catch (IOException | SQLException e){
             throw new RuntimeException(e);
         }
