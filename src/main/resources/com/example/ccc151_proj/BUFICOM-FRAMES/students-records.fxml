@@ -22,7 +22,7 @@
       <Pane layoutX="31.0" layoutY="14.0" prefHeight="65.0" prefWidth="1068.0" style="-fx-background-color: #590004; -fx-background-radius: 20px; -fx-border-radius: 20px;">
          <children>
             <TextField fx:id="search_id" layoutX="14.0" layoutY="15.0" prefHeight="36.0" prefWidth="625.0" promptText="Search ID Number" style="-fx-background-radius: 10px; -fx-border-radius: 10px; -fx-background-color: white; -fx-border-color: white;" />
-            <Button fx:id="search_student_button" disable="true" layoutX="595.0" layoutY="16.0" mnemonicParsing="false" prefHeight="31.0" prefWidth="38.0" style="-fx-background-color: #590004; -fx-background-color: #590004; -fx-background-radius: 10px; -fx-border-radius: 10px;">
+            <Button fx:id="search_student_button" disable="true" layoutX="595.0" layoutY="16.0" mnemonicParsing="false" onAction="#searchID" prefHeight="31.0" prefWidth="38.0" style="-fx-background-color: #590004; -fx-background-color: #590004; -fx-background-radius: 10px; -fx-border-radius: 10px;">
                <font>
                   <Font size="15.0" />
                </font>

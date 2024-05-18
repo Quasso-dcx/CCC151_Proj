@@ -144,6 +144,9 @@ public class ClassRepControl {
         });
     }
 
+    /**
+     * Fetch and display the statistics of the students.
+     */
     private void getStatistics(){
         try {
             String students_paid_1_query = "SELECT COUNT(p.`status`) AS `Students Paid` FROM `pays` AS p LEFT JOIN `students` AS s ON p.`payer_id` = s.`id_number` "
