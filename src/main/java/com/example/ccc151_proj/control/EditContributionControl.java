@@ -54,18 +54,13 @@ public class EditContributionControl {
 
         organization_code_textfield.setText(this.org_code);
         academic_year_textfield.setText(this.academic_year);
-
-        ObservableList<String> semester_list = FXCollections.observableArrayList();
-        semester_list.add("1");
-        semester_list.add("2");
-        semester_combobox.setItems(semester_list);
         semester_combobox.getSelectionModel().selectFirst();
 
         ObservableList<ContributionProperties> contribution_list = FXCollections.observableArrayList();
         try {
             String contribution_info_query = "SELECT `contribution_code`, `semester`, `amount` FROM `contributions` "
-                    + "WHERE `collecting_org_code` = '" + this.org_code + "' "
-                    + "AND `academic_year` = '" + this.academic_year + "';";
+                    + "WHERE `collecting_org_code` = \'" + this.org_code + "\' "
+                    + "AND `academic_year` = \'" + this.academic_year + "\';";
             PreparedStatement get_contribution_info = connect.prepareStatement(contribution_info_query);
             ResultSet result = get_contribution_info.executeQuery();
             while (result.next()) {
@@ -106,6 +101,7 @@ public class EditContributionControl {
                 semester_combobox.getItems().add(contribution.getContribution_sem());
                 semester_combobox.getSelectionModel().selectFirst();
                 amount_textfield.setText(String.valueOf(contribution.getContribution_amount()));
+                amount_textfield.setBorder(Border.EMPTY);
                 edit_contribution_button.setDisable(false);
             }
         });
