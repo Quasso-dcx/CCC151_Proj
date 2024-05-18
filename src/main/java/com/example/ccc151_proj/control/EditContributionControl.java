@@ -120,6 +120,7 @@ public class EditContributionControl {
         semester_combobox.getSelectionModel().selectFirst();
         amount_textfield.clear();
         edit_contribution_button.setDisable(true);
+        contribution_data_table.getSelectionModel().clearSelection();
     }
 
     /**
