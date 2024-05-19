@@ -3,6 +3,7 @@ package com.example.ccc151_proj.control;
 import com.example.ccc151_proj.Main;
 import com.example.ccc151_proj.model.DataManager;
 import com.example.ccc151_proj.model.Security;
+
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -65,91 +66,102 @@ public class LoginProcess implements Initializable {
      */
     @FXML
     private void loginOperation(ActionEvent event) {
-        // notify user when a field is empty
-        if (this.id_input.getText().isEmpty() || passwordValue().isEmpty()){
+        // notify user when a field is empty by making the textfields red
+        if (id_input.getText().isEmpty() || passwordValue().isEmpty()){
             Border error_border = new Border(new BorderStroke(Color.RED, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT));
-
-            if (this.id_input.getText().isEmpty()) this.id_input.setBorder(error_border);
+            if (id_input.getText().isEmpty()) id_input.setBorder(error_border);
             if (passwordValue().isEmpty()){
-                if (!show_password_rbutton.isSelected()) this.pass_input.setBorder(error_border);
-                else this.pass_input_show.setBorder(error_border);
+                if (!show_password_rbutton.isSelected()) pass_input.setBorder(error_border);
+                else pass_input_show.setBorder(error_border);
             }
             return;
         }
 
         // if the user is listed and the password was changed
-        if (isUserListed(this.id_input.getText(), passwordValue()) && !passwordValue().equals(this.id_input.getText())) {
+        if (isUserListed(id_input.getText(), passwordValue()) && !passwordValue().equals(id_input.getText())) {
             // close the login stage
             ((Stage) ((Node) event.getSource()).getScene().getWindow()).close();
-
             // choose the display based on the position of the user
-            String user_position = getUserPosition();
-            displayMainFrame(user_position);
+            displayMainFrame(getUserPosition());
         } else {
             // if the user is not listed in the database
-            if (!isUserListed(this.id_input.getText(), passwordValue())) {
-                ButtonType forgot_password = new ButtonType("Forgot Password", ButtonBar.ButtonData.OTHER);
-                ButtonType ok_button = new ButtonType("Ok", ButtonBar.ButtonData.OK_DONE);
-                Alert connection_error = new Alert(Alert.AlertType.ERROR, "Wrong ID or Password.",ok_button, forgot_password);
-                connection_error.setTitle("Login Unsuccessful");
-                connection_error.setHeaderText(null);
-                Optional<ButtonType> result = connection_error.showAndWait();
-                result.ifPresent(res -> {
-                    if (result.get() == forgot_password) {
-                        Alert inform = new Alert(Alert.AlertType.INFORMATION);
-                        inform.setTitle("Request for a Password Change");
-                        inform.setHeaderText("Notify the Developer/Admin");
-                        inform.setContentText("Please email c6918434@gmail.com your Student ID and request for password change. Thank You");
-                        inform.showAndWait();
-                    }
-                });
+            if (!isUserListed(id_input.getText(), passwordValue())) {
+                displayForgotPasswordOption();
                 return;
             }
 
             // if the password isn't changed (id == password)
-            if (passwordValue().equals(this.id_input.getText())) {
-                // set up the alert
-                ButtonType yes = new ButtonType("Yes", ButtonBar.ButtonData.YES);
-                ButtonType no = new ButtonType("No", ButtonBar.ButtonData.NO);
-                Alert pass_not_changed = new Alert(Alert.AlertType.CONFIRMATION,
-                        "Please change your password for better security.", yes, no);
-                pass_not_changed.setTitle("Original Password still active");
-                pass_not_changed.setHeaderText("You haven't changed your password. Do you want to change it now?");
-                Optional<ButtonType> result = pass_not_changed.showAndWait();
-                result.ifPresent(res -> {
-                    if (result.get() == yes) {
-                        try {
-                            // close the login stage
-                            ((Stage) ((Node) event.getSource()).getScene().getWindow()).close();
-
-                            Stage change_pass_stage = new Stage();
-                            // initialize the loader for the change password form
-                            FXMLLoader change_pass_loader = new FXMLLoader(
-                                    Main.class.getResource("change-password.fxml"));
-                            Parent change_pass_parent = change_pass_loader.load();
-                            // initialize the controller
-                            ChangePasswordControl change_pass_control = change_pass_loader.getController();
-                            change_pass_control.initialize(this.id_input.getText());
-
-                            // create the scene
-                            Scene change_pass_scene = new Scene(change_pass_parent);
-                            change_pass_stage.setScene(change_pass_scene);
-                            change_pass_stage.show();
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
-                    } else if (result.get() == no) {
-                        // if the user doesn't want to change the password yet
-                        // close the login stage
-                        ((Stage) ((Node) event.getSource()).getScene().getWindow()).close();
-
-                        // choose the display based on the position of the user
-                        String user_position = getUserPosition();
-                        displayMainFrame(user_position);
-                    }
-                });
+            if (passwordValue().equals(id_input.getText())) {
+                displayChangePasswordOption(event);
             }
         }
+    }
+
+    /**
+     * Display the forgot password option to the user.
+     */
+    private void displayForgotPasswordOption(){
+        ButtonType forgot_password = new ButtonType("Forgot Password", ButtonBar.ButtonData.OTHER);
+        ButtonType ok_button = new ButtonType("Ok", ButtonBar.ButtonData.OK_DONE);
+        Alert connection_error = new Alert(Alert.AlertType.ERROR, "Wrong ID or Password.",ok_button, forgot_password);
+        connection_error.setTitle("Login Unsuccessful");
+        connection_error.setHeaderText(null);
+        Optional<ButtonType> result = connection_error.showAndWait();
+        result.ifPresent(res -> {
+            if (result.get() == forgot_password) {
+                Alert inform = new Alert(Alert.AlertType.INFORMATION);
+                inform.setTitle("Request for a Password Change");
+                inform.setHeaderText("Notify the Developer/Admin");
+                inform.setContentText("Please email c6918434@gmail.com your Student ID and request for password change. Thank You");
+                inform.showAndWait();
+            }
+        });
+    }
+
+    /**
+     * Display the change password stage to the user.
+     *
+     * @param event
+     */
+    private void displayChangePasswordOption(ActionEvent event){
+        // set up the alert
+        ButtonType yes = new ButtonType("Yes", ButtonBar.ButtonData.YES);
+        ButtonType no = new ButtonType("No", ButtonBar.ButtonData.NO);
+        Alert pass_not_changed = new Alert(Alert.AlertType.CONFIRMATION,
+                "Please change your password for better security.", yes, no);
+        pass_not_changed.setTitle("Original Password still active");
+        pass_not_changed.setHeaderText("You haven't changed your password. Do you want to change it now?");
+        Optional<ButtonType> result = pass_not_changed.showAndWait();
+        result.ifPresent(res -> {
+            if (result.get() == yes) {
+                try {
+                    // close the login stage
+                    ((Stage) ((Node) event.getSource()).getScene().getWindow()).close();
+
+                    Stage change_pass_stage = new Stage();
+                    // initialize the loader for the change password form
+                    FXMLLoader change_pass_loader = new FXMLLoader(
+                            Main.class.getResource("change-password.fxml"));
+                    Parent change_pass_parent = change_pass_loader.load();
+                    // initialize the controller
+                    ChangePasswordControl change_pass_control = change_pass_loader.getController();
+                    change_pass_control.initialize(id_input.getText());
+
+                    // create the scene
+                    Scene change_pass_scene = new Scene(change_pass_parent);
+                    change_pass_stage.setScene(change_pass_scene);
+                    change_pass_stage.show();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            } else if (result.get() == no) {
+                // if the user doesn't want to change the password yet
+                // close the login stage
+                ((Stage) ((Node) event.getSource()).getScene().getWindow()).close();
+                // choose the display based on the position of the user
+                displayMainFrame(getUserPosition());
+            }
+        });
     }
 
     /**
@@ -196,7 +208,7 @@ public class LoginProcess implements Initializable {
 
                 // initialize the controller
                 ClassRepControl class_rep_control = class_rep_loader.getController();
-                class_rep_control.initialize(this.id_input.getText());
+                class_rep_control.initialize(id_input.getText());
 
                 // create the scene
                 Scene class_rep_scene = new Scene(class_rep_parent);
@@ -220,7 +232,7 @@ public class LoginProcess implements Initializable {
 
                 // initialize the controllers
                 BuficomInfoControl buficom_info_control = buficom_info_loader.getController();
-                buficom_info_control.initialize(buficom_parent, this.id_input.getText(), getUserPosition());
+                buficom_info_control.initialize(buficom_parent, id_input.getText(), getUserPosition());
                 VerifyPaymentsControl dashboard_control = dashboard_loader.getController();
                 dashboard_control.initialize(buficom_info_control.getOrg_code());
 
@@ -246,22 +258,20 @@ public class LoginProcess implements Initializable {
         String recorded_pass;
         try {
             // fetch the password from the database
-            String user_info_query = "SELECT `password` FROM `users` WHERE `user_id` = '" + id_number + "';";
+            String user_info_query = "SELECT `password` "
+                    + "FROM `users` "
+                    + "WHERE `user_id` = '" + id_number + "';";
             PreparedStatement get_user_info = LoginProcess.connect.prepareStatement(user_info_query);
             ResultSet result = get_user_info.executeQuery();
-            if (result.next())
-                recorded_pass = result.getString("password");
-            else
-                return false; // if the user isn't listed
+            if (result.next()) recorded_pass = result.getString("password");
+            else return false; // if the user isn't listed
             get_user_info.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
 
-        if (id_number.equals(recorded_pass))
-            return recorded_pass.equals(password); // if the password wasn't changed
-        else
-            return Security.verifyPassword(password, recorded_pass); // if the password was changed
+        if (id_number.equals(recorded_pass)) return recorded_pass.equals(password); // if the password wasn't changed
+        else return Security.verifyPassword(password, recorded_pass); // if the password was changed
     }
 
     /**
@@ -277,8 +287,7 @@ public class LoginProcess implements Initializable {
                     + "WHERE `officer_id` = '" + id_input.getText() + "';";
             PreparedStatement check_user_position = connect.prepareStatement(position_query);
             ResultSet result = check_user_position.executeQuery();
-            if (result.next())
-                user_position = result.getString("position");
+            if (result.next()) user_position = result.getString("position");
             check_user_position.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);

@@ -14,7 +14,8 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
-import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -66,6 +67,7 @@ public class TransactionProcess {
      */
     public void initialize(String contribution_code) {
         connect = DataManager.getConnect();
+
         // get the information of the contribution from its code
         this.contribution_code = contribution_code;
         String[] contribution_details = this.contribution_code.split("_");
@@ -102,9 +104,7 @@ public class TransactionProcess {
 
         // add the modes of payment
         ObservableList<String> modes = FXCollections.observableArrayList();
-        modes.add("Cash");
-        modes.add("GCash");
-        modes.add("Others");
+        modes.addAll("Cash", "GCash", "Others");
         transaction_payment_mode.setItems(modes);
         transaction_payment_mode.getSelectionModel().selectFirst();
 
@@ -113,6 +113,7 @@ public class TransactionProcess {
             // disable the input of receipt when the mode of payment is "Cash"
             add_receipt_button.setDisable(transaction_payment_mode.getValue().equals("Cash"));
             receipt_link.setDisable(transaction_payment_mode.getValue().equals("Cash"));
+            receipt_link.setBorder(Border.EMPTY);
         });
     }
 
@@ -122,6 +123,9 @@ public class TransactionProcess {
     @FXML
     private void recordTransaction() {
         if (!transaction_payment_mode.getValue().equals("Cash") && receipt_link.getText().equals("No File Chosen")){
+            Border error_border = new Border(new BorderStroke(Color.RED, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT));
+            receipt_link.setBorder(error_border);
+
             Alert no_receipt = new Alert(Alert.AlertType.ERROR);
             no_receipt.setTitle("Receipt Required.");
             no_receipt.setHeaderText(null);
@@ -129,7 +133,8 @@ public class TransactionProcess {
             no_receipt.showAndWait();
         } else {
             try {
-                String update_payer_status_query = "INSERT INTO `pays` (`contribution_code`, `payer_id`, `payment_mode`, `payer_receipt`, `status`) VALUES (?, ?, ?, ?, 'Pending');";
+                String update_payer_status_query = "INSERT INTO `pays` (`contribution_code`, `payer_id`, `payment_mode`, `payer_receipt`, `status`) "
+                        + "VALUES (?, ?, ?, ?, 'Pending');";
                 PreparedStatement insert_payer_status = connect.prepareStatement(update_payer_status_query);
                 insert_payer_status.setString(1, contribution_code);
                 insert_payer_status.setString(2, payer.getId_number());
@@ -193,18 +198,16 @@ public class TransactionProcess {
             String path = receipt_link.getText().replace('\\', '/');
             String[] folder_paths = path.split("/");
             StringBuilder folder_path = new StringBuilder();
-            for (int folder = 0; folder < folder_paths.length - 1; folder++) {
-                folder_path.append(folder_paths[folder]).append('\\');
-            }
+
+            for (String folder : folder_paths)
+                folder_path.append(folder).append('\\');
+
             fileChooser.setInitialDirectory(new File(folder_path.toString()));
         }
 
-        fileChooser.getExtensionFilters().add(
-                new FileChooser.ExtensionFilter("IMAGE FILES", "*.jpg", "*.png", "*.jpeg")
-        );
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("IMAGE FILES", "*.jpg", "*.png", "*.jpeg"));
         File receipt_file = fileChooser.showOpenDialog(((Stage) transaction_scene.getScene().getWindow()).getOwner());
-        if (receipt_file != null)
-            receipt_link.setText(receipt_file.getAbsolutePath());
+        if (receipt_file != null) receipt_link.setText(receipt_file.getAbsolutePath());
     }
 
     /**
@@ -249,20 +252,24 @@ public class TransactionProcess {
             try {
                 InputStream stream = new FileInputStream(receipt_link.getText());
                 Image image = new Image(stream);
+
                 //Creating the image view
                 ImageView imageView = new ImageView();
+
                 //Setting image to the image view
                 imageView.setImage(image);
+
                 //Setting the image view parameters
                 imageView.setX(0);
                 imageView.setY(0);
                 imageView.setFitHeight(600);
                 imageView.setFitWidth(500);
                 imageView.setPreserveRatio(true);
+
                 //Setting the Scene object
                 Group root = new Group(imageView);
                 Scene scene = new Scene(root);
-                receipt_stage.setTitle("Payment Receipt.");
+                receipt_stage.setTitle("Payment Receipt");
                 receipt_stage.setScene(scene);
                 receipt_stage.show();
             } catch (FileNotFoundException e) {
@@ -284,12 +291,10 @@ public class TransactionProcess {
     }
 
     public void setOrg_code(String org_code) {
-
         this.org_code = org_code;
     }
 
     public String getSemester() {
-
         return semester;
     }
 

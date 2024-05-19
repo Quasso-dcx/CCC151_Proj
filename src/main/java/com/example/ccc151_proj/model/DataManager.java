@@ -13,6 +13,7 @@ public class DataManager {
     private static Connection connect;
     //TODO: Change the Academic Year often as I don't know how to change it automatically :<<
     private static String academic_year = "2023-2024";
+    private static final boolean isConnectOnline = false;
 
     public DataManager() {
     }
@@ -23,24 +24,30 @@ public class DataManager {
     public static void createConnection() {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
+            String sql_name;
+            String host_name;
+            String port;
+            String schema_name;
+            String username;
+            String password;
 
-            // change for new connection (this is for my personal connection)
-            String sql_name = "mysql";
-            String host_name = "127.0.0.1";
-            String port = "3306";
-            String schema_name = "Student_Payment_System";
-            String username = "root";
-            String password = "rootPassword";
-
-            /*
-            // use this for the online database
-            String sql_name = "mysql";
-            String host_name = "mysql-110300b9-systemproject.f.aivencloud.com";
-            String port = "12738";
-            String schema_name = "student_payment_system";
-            String username = "user_admin";
-            String password = "AVNS_wQT83-LDuTCcf-SLtIu";
-             */
+            if (isConnectOnline){
+                // use this for the online database
+                sql_name = "mysql";
+                host_name = "mysql-110300b9-systemproject.f.aivencloud.com";
+                port = "12738";
+                schema_name = "student_payment_system";
+                username = "user_admin";
+                password = "AVNS_wQT83-LDuTCcf-SLtIu";
+            } else {
+                // change for new connection (this is for my personal connection)
+                sql_name = "mysql";
+                host_name = "127.0.0.1";
+                port = "3306";
+                schema_name = "Student_Payment_System";
+                username = "root";
+                password = "rootPassword";
+            }
 
             connect = DriverManager.getConnection("jdbc:" + sql_name + "://" + host_name + ":" + port + "/" + schema_name, username, password);
         } catch (SQLException | ClassNotFoundException e) {

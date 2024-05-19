@@ -21,7 +21,7 @@ public class Main extends Application {
         FXMLLoader login_view = new FXMLLoader(Main.class.getResource("login-frame.fxml"));
         Scene login_scene = new Scene(login_view.load());
 
-        login_stage.setTitle("Login");
+        login_stage.setTitle("Login to SCPS");
         login_stage.getIcons().add(new Image(new File("src/src/app-logo.jpg").toURI().toString()));
         login_stage.setScene(login_scene);
         login_stage.setResizable(false);

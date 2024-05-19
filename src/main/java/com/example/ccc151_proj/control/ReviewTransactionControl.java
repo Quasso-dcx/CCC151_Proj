@@ -109,6 +109,8 @@ public class ReviewTransactionControl {
             String transaction_message = result.getString("transaction_message");
             if (!result.wasNull())
                 transaction_comments.setText(transaction_message);
+
+            get_payment_info.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -125,20 +127,24 @@ public class ReviewTransactionControl {
         try {
             InputStream stream = receipt_image.getBinaryStream();
             Image image = new Image(stream);
+
             // Creating the image view
             ImageView imageView = new ImageView();
+
             // Setting image to the image view
             imageView.setImage(image);
+
             // Setting the image view parameters
             imageView.setX(0);
             imageView.setY(0);
             imageView.setFitHeight(600);
             imageView.setFitWidth(500);
             imageView.setPreserveRatio(true);
+
             // Setting the Scene object
             Group root = new Group(imageView);
             Scene scene = new Scene(root);
-            receipt_stage.setTitle("Payment Receipt.");
+            receipt_stage.setTitle("Payment Receipt");
             receipt_stage.setScene(scene);
             receipt_stage.getIcons().add(new Image(new File("src/src/app-logo.jpg").toURI().toString()));
             receipt_stage.setResizable(false);

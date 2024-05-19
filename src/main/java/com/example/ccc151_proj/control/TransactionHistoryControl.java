@@ -12,6 +12,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
@@ -60,7 +62,7 @@ public class TransactionHistoryControl {
     public void initialize(String org_code) {
         connect = DataManager.getConnect();
         this.org_code = org_code;
-        this.academic_year = DataManager.getAcademic_year();
+        academic_year = DataManager.getAcademic_year();
 
         setupContributions();
         displayPayments();
@@ -89,8 +91,8 @@ public class TransactionHistoryControl {
         try {
             String contribution_code_query = "SELECT `contribution_code` "
                     + "FROM `contributions` "
-                    + "WHERE `collecting_org_code` = '" + this.org_code + "' "
-                    + "AND `academic_year` = '" + this.academic_year + "';";
+                    + "WHERE `collecting_org_code` = '" + org_code + "' "
+                    + "AND `academic_year` = '" + academic_year + "';";
             PreparedStatement get_contribution_code = connect.prepareStatement(contribution_code_query);
             ResultSet result = get_contribution_code.executeQuery();
             ObservableList<String> contribution_list = FXCollections.observableArrayList();
@@ -187,11 +189,7 @@ public class TransactionHistoryControl {
         program_code_combobox.getSelectionModel().selectFirst();
 
         ObservableList<String> year_list = FXCollections.observableArrayList();
-        year_list.add("--Select Year--");
-        year_list.add("1st Year");
-        year_list.add("2nd Year");
-        year_list.add("3rd Year");
-        year_list.add("4th Year");
+        year_list.addAll("--Select Year--", "1st Year", "2nd Year", "3rd Year", "4th Year");
         year_level_combobox.setItems(year_list);
         year_level_combobox.getSelectionModel().selectFirst();
     }
@@ -201,8 +199,7 @@ public class TransactionHistoryControl {
      */
     @FXML
     private void search_block_button_clicked() {
-        if (!program_code_combobox.getValue().equals("--Select Program--")
-                && !year_level_combobox.getValue().equals("--Select Year--")) {
+        if (!program_code_combobox.getValue().equals("--Select Program--") && !year_level_combobox.getValue().equals("--Select Year--")) {
             displayPayments();
             search_id_textfield.clear();
 
@@ -235,11 +232,9 @@ public class TransactionHistoryControl {
                 throw new RuntimeException(e);
             }
         } else {
-            Alert non_selected = new Alert(Alert.AlertType.ERROR);
-            non_selected.setTitle("Invalid Selection");
-            non_selected.setHeaderText(null);
-            non_selected.setContentText("Invalid Program Code or Year Level.");
-            non_selected.showAndWait();
+            Border error_border = new Border(new BorderStroke(Color.RED, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT));
+            if (program_code_combobox.getValue().equals("--Select Program--")) program_code_combobox.setBorder(error_border);
+            if (year_level_combobox.getValue().equals("--Select Program--")) year_level_combobox.setBorder(error_border);
         }
     }
 
@@ -248,43 +243,36 @@ public class TransactionHistoryControl {
      */
     @FXML
     private void search_id_button_clicked() {
-        if (!search_id_textfield.getText().isEmpty()) {
-            displayPayments();
-            program_code_combobox.getSelectionModel().selectFirst();
-            year_level_combobox.getSelectionModel().selectFirst();
-            ObservableList<UnverifiedPayment> payer_with_id_list = FXCollections.observableArrayList();
-            try {
-                String search_id_query = "SELECT `id_number`, `first_name`, `middle_name`, `last_name`, `suffix_name`, `status`, `transaction_id` "
-                        + "FROM `pays` AS p LEFT JOIN `students` AS s ON p.`payer_id` = s.`id_number` "
-                        + "WHERE p.`payer_id` LIKE '%" + search_id_textfield.getText() + "%' "
-                        + "AND p.`contribution_code` = '" + contribution_code_combobox.getSelectionModel().getSelectedItem() + "' "
-                        + "AND (p.`status` = 'Accepted' OR p.`status` = 'Rejected') "
-                        + "ORDER BY `transaction_id` DESC;";
-                PreparedStatement get_student_id = connect.prepareStatement(search_id_query);
-                ResultSet result = get_student_id.executeQuery();
-                while (result.next()) {
-                    String id_number = result.getString("id_number");
-                    String first_name = result.getString("first_name");
-                    String middle_name = result.getString("middle_name");
-                    String last_name = result.getString("last_name");
-                    String suffix_name = result.getString("suffix_name");
-                    String status = result.getString("status");
-                    long transaction_id = result.getLong("transaction_id");
+        displayPayments();
+        program_code_combobox.getSelectionModel().selectFirst();
+        year_level_combobox.getSelectionModel().selectFirst();
 
-                    payer_with_id_list.add(new UnverifiedPayment(id_number, first_name, middle_name, last_name,
-                            suffix_name, status, transaction_id));
-                }
-                setupData(payer_with_id_list);
-                get_student_id.close();
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
+        ObservableList<UnverifiedPayment> payer_with_id_list = FXCollections.observableArrayList();
+        try {
+            String search_id_query = "SELECT `id_number`, `first_name`, `middle_name`, `last_name`, `suffix_name`, `status`, `transaction_id` "
+                    + "FROM `pays` AS p LEFT JOIN `students` AS s ON p.`payer_id` = s.`id_number` "
+                    + "WHERE p.`payer_id` LIKE '%" + search_id_textfield.getText() + "%' "
+                    + "AND p.`contribution_code` = '" + contribution_code_combobox.getSelectionModel().getSelectedItem() + "' "
+                    + "AND (p.`status` = 'Accepted' OR p.`status` = 'Rejected') "
+                    + "ORDER BY `transaction_id` DESC;";
+            PreparedStatement get_student_id = connect.prepareStatement(search_id_query);
+            ResultSet result = get_student_id.executeQuery();
+            while (result.next()) {
+                String id_number = result.getString("id_number");
+                String first_name = result.getString("first_name");
+                String middle_name = result.getString("middle_name");
+                String last_name = result.getString("last_name");
+                String suffix_name = result.getString("suffix_name");
+                String status = result.getString("status");
+                long transaction_id = result.getLong("transaction_id");
+
+                payer_with_id_list.add(new UnverifiedPayment(id_number, first_name, middle_name, last_name,
+                        suffix_name, status, transaction_id));
             }
-        } else {
-            Alert success_transaction = new Alert(Alert.AlertType.ERROR);
-            success_transaction.setTitle("Empty ID");
-            success_transaction.setHeaderText(null);
-            success_transaction.setContentText("Please Input ID Number.");
-            success_transaction.showAndWait();
+            setupData(payer_with_id_list);
+            get_student_id.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
     }
 

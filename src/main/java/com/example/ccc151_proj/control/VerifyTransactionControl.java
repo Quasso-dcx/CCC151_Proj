@@ -116,20 +116,23 @@ public class VerifyTransactionControl {
         receipt_stage.getIcons().add(new Image(new File("src/src/app-logo.jpg").toURI().toString()));
         receipt_stage.setResizable(false);
         receipt_stage.initModality(Modality.APPLICATION_MODAL);
-
         try {
             InputStream stream = receipt_image.getBinaryStream();
             Image image = new Image(stream);
+
             //Creating the image view
             ImageView imageView = new ImageView();
+
             //Setting image to the image view
             imageView.setImage(image);
+
             //Setting the image view parameters
             imageView.setX(0);
             imageView.setY(0);
             imageView.setFitHeight(600);
             imageView.setFitWidth(500);
             imageView.setPreserveRatio(true);
+
             //Setting the Scene object
             Group root = new Group(imageView);
             Scene scene = new Scene(root);
@@ -208,7 +211,9 @@ public class VerifyTransactionControl {
                     confirmation.showAndWait();
 
                     // notify the payer via email
-                    notifyPayer("Please contact your Classroom Representative.", "Rejected");
+                    notifyPayer("Please contact your Classroom Representative or a BUFICOM Officer from "
+                            + transaction_label.getText().replace(" Contribution", "").split("_")[0]
+                            + " for clarification. Thank you.", "Rejected");
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
                 }
@@ -217,12 +222,7 @@ public class VerifyTransactionControl {
         } else {
             Border error_border = new Border(new BorderStroke(Color.RED, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT));
             transaction_comments.setBorder(error_border);
-            // reason/s for rejection is required.
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Rejection Comment");
-            alert.setHeaderText(null);
-            alert.setContentText("Please provide reason.");
-            alert.showAndWait();
+            transaction_comments.setPromptText("Please provide a reason.");
         }
     }
 
@@ -249,11 +249,12 @@ public class VerifyTransactionControl {
             // create the body of the message, along with the receipt photo if available
             String receipt_id = " None ";
             File file = null;
-            // since receipt photo is only available when payment mode isn't Cash
-            if (!transaction_payment_mode.getValue().equals("Cash")){
+            if (!transaction_payment_mode.getValue().equals("Cash")){   // since receipt photo is only available when payment mode isn't Cash
                 receipt_id = "<img height=\"300\" width=\"200\" src=\"cid:image\" >";     // html format for the image insertion
+
                 // create a temporary file where the receipt will be stored
                 file = File.createTempFile("temp_receipt", ".png");
+
                 // output the Blob from the database to the temporary file
                 FileOutputStream outputStream = new FileOutputStream(file);
                 outputStream.write(receipt_image.getBinaryStream().readAllBytes());
@@ -343,7 +344,6 @@ public class VerifyTransactionControl {
             EmailSender sender = new EmailSender(payer_email, subject_message, message_to_student, file);
             Thread sender_thread = new Thread(sender);
             sender_thread.start();
-
         } catch (IOException | SQLException e){
             throw new RuntimeException(e);
         }

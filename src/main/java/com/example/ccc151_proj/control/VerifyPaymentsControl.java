@@ -13,6 +13,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
@@ -66,7 +68,7 @@ public class VerifyPaymentsControl {
     public void initialize(String org_code) {
         connect = DataManager.getConnect();
         this.org_code = org_code;
-        this.academic_year = DataManager.getAcademic_year();
+        academic_year = DataManager.getAcademic_year();
 
         setupContributions();
         displayPayments();
@@ -194,11 +196,7 @@ public class VerifyPaymentsControl {
         program_code_combobox.getSelectionModel().selectFirst();
 
         ObservableList<String> year_list = FXCollections.observableArrayList();
-        year_list.add("--Select Year--");
-        year_list.add("1st Year");
-        year_list.add("2nd Year");
-        year_list.add("3rd Year");
-        year_list.add("4th Year");
+        year_list.addAll("--Select Year--", "1st Year", "2nd Year", "3rd Year", "4th Year");
         year_level_combobox.setItems(year_list);
         year_level_combobox.getSelectionModel().selectFirst();
     }
@@ -208,10 +206,10 @@ public class VerifyPaymentsControl {
      */
     @FXML
     private void search_block_button_clicked() {
-        if (!program_code_combobox.getValue().equals("--Select Program--")
-                && !year_level_combobox.getValue().equals("--Select Year--")) {
+        if (!program_code_combobox.getValue().equals("--Select Program--") && !year_level_combobox.getValue().equals("--Select Year--")) {
             displayPayments();
             search_id_textfield.clear();
+
             ObservableList<UnverifiedPayment> unverified_list = FXCollections.observableArrayList();
             try {
                 String unverified_payments_query = "SELECT `id_number`, `first_name`, `middle_name`, `last_name`, `suffix_name`, `status`, `transaction_id` "
@@ -240,11 +238,9 @@ public class VerifyPaymentsControl {
                 throw new RuntimeException(e);
             }
         } else {
-            Alert non_selected = new Alert(Alert.AlertType.ERROR);
-            non_selected.setTitle("Invalid Selection");
-            non_selected.setHeaderText(null);
-            non_selected.setContentText("Invalid Program Code or Year Level.");
-            non_selected.showAndWait();
+            Border error_border = new Border(new BorderStroke(Color.RED, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT));
+            if (program_code_combobox.getValue().equals("--Select Program--")) program_code_combobox.setBorder(error_border);
+            if (year_level_combobox.getValue().equals("--Select Program--")) year_level_combobox.setBorder(error_border);
         }
     }
 

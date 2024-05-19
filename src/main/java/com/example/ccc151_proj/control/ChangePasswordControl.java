@@ -10,6 +10,8 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -100,32 +102,45 @@ public class ChangePasswordControl {
                             FXMLLoader login_view = new FXMLLoader(Main.class.getResource("login-frame.fxml"));
                             Scene login_scene = new Scene(login_view.load());
 
-                            login_stage.setTitle("Login");
+                            login_stage.setTitle("Login to SCPS");
                             login_stage.setScene(login_scene);
                             login_stage.setResizable(false);
                             login_stage.show();
                         } catch (IOException e) {
                             throw new RuntimeException(e);
                         }
+                    } else {
+                        ((Stage) ((Node) event.getSource()).getScene().getWindow()).close();
                     }
                 });
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
         } else {
+            Border error_border = new Border(new BorderStroke(Color.RED, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT));
+
             if (newPasswordValue().length() < 8) {
+                if (show_password_rbutton.isSelected()) new_password_show.setBorder(error_border);
+                else new_password.setBorder(error_border);
+
                 Alert password_too_small = new Alert(Alert.AlertType.ERROR);
                 password_too_small.setTitle("Insufficient Password Length");
-                password_too_small.setHeaderText("Password too small.");
+                password_too_small.setHeaderText("Password too short.");
                 password_too_small.setContentText("Please use password with length >= 8.");
                 password_too_small.showAndWait();
             } else if (newPasswordValue().equals(user_id)) {
+                if (show_password_rbutton.isSelected()) new_password_show.setBorder(error_border);
+                else new_password.setBorder(error_border);
+
                 Alert pass_same_old = new Alert(Alert.AlertType.ERROR);
                 pass_same_old.setTitle("Password is the old one.");
                 pass_same_old.setHeaderText("Password must not be the same with the old one.");
                 pass_same_old.setContentText("Please make sure to change the password");
                 pass_same_old.showAndWait();
             } else {
+                if (show_retype_password_rbutton.isSelected()) retype_password_show.setBorder(error_border);
+                else retype_password.setBorder(error_border);
+
                 Alert password_not_match = new Alert(Alert.AlertType.ERROR);
                 password_not_match.setTitle("Password doesn't match.");
                 password_not_match.setHeaderText("Check retype password.");

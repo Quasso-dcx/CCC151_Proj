@@ -52,22 +52,24 @@ public class EditContributionControl {
 
     /**
      * Set up the initial display and fetch the necessary data for the contributions.
+     *
      * @param org_code
      */
     public void initialize(String org_code) {
         connect = DataManager.getConnect();
         this.org_code = org_code;
-        this.academic_year = DataManager.getAcademic_year();
+        academic_year = DataManager.getAcademic_year();
 
         organization_code_textfield.setText(this.org_code);
-        academic_year_textfield.setText(this.academic_year);
+        academic_year_textfield.setText(academic_year);
         semester_combobox.getSelectionModel().selectFirst();
 
         ObservableList<ContributionProperties> contribution_list = FXCollections.observableArrayList();
         try {
-            String contribution_info_query = "SELECT `contribution_code`, `semester`, `amount` FROM `contributions` "
+            String contribution_info_query = "SELECT `contribution_code`, `semester`, `amount` "
+                    + "FROM `contributions` "
                     + "WHERE `collecting_org_code` = '" + this.org_code + "' "
-                    + "AND `academic_year` = '" + this.academic_year + "';";
+                    + "AND `academic_year` = '" + academic_year + "';";
             PreparedStatement get_contribution_info = connect.prepareStatement(contribution_info_query);
             ResultSet result = get_contribution_info.executeQuery();
             while (result.next()) {
@@ -75,7 +77,7 @@ public class EditContributionControl {
                 String semester = result.getString("semester");
                 Integer amount = result.getInt("amount");
 
-                contribution_list.add(new ContributionProperties(contribution_code, this.academic_year, semester, amount));
+                contribution_list.add(new ContributionProperties(contribution_code, academic_year, semester, amount));
             }
             result.close();
             setupContributionData(contribution_list);
@@ -140,7 +142,9 @@ public class EditContributionControl {
             confirm.ifPresent(choice -> {
                 if (confirm.get() == ButtonType.OK){
                     try {
-                        String edit_contribution_query = "UPDATE `contributions` SET `semester` = ?, `amount` = ? WHERE `contribution_code` = ?;";
+                        String edit_contribution_query = "UPDATE `contributions` "
+                                + "SET `semester` = ?, `amount` = ? "
+                                + "WHERE `contribution_code` = ?;";
                         PreparedStatement edit_contribution = connect.prepareStatement(edit_contribution_query);
                         edit_contribution.setString(1, semester_combobox.getValue());
                         edit_contribution.setInt(2, Integer.parseInt(amount_textfield.getText()));
