@@ -53,9 +53,10 @@ public class DataManager {
         } catch (SQLException | ClassNotFoundException e) {
             Alert connection_error = new Alert(Alert.AlertType.ERROR);
             connection_error.setTitle("Database Connection Error");
-            connection_error.setHeaderText(null);
+            connection_error.setHeaderText("Check your connection.");
             connection_error.setContentText(e.toString());
             connection_error.showAndWait();
+            System.exit(0);
         }
     }
 

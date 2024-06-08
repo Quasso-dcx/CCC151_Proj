@@ -113,7 +113,12 @@ public class VerifyPaymentsControl {
             });
             get_contribution_code.close();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            Alert connection_error = new Alert(Alert.AlertType.ERROR);
+            connection_error.setTitle("Database Connection Error");
+            connection_error.setHeaderText("Check your connection.");
+            connection_error.setContentText(e.toString());
+            connection_error.showAndWait();
+            System.exit(0);
         }
     }
 
@@ -139,13 +144,17 @@ public class VerifyPaymentsControl {
                 String status = result.getString("status");
                 long transaction_id = result.getLong("transaction_id");
 
-                unverified_list.add(new UnverifiedPayment(id_number, first_name, middle_name, last_name,
-                        suffix_name, status, transaction_id));
+                unverified_list.add(new UnverifiedPayment(id_number, first_name, middle_name, last_name, suffix_name, status, transaction_id));
             }
             setupData(unverified_list);
             get_unverified_payments.close();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            Alert connection_error = new Alert(Alert.AlertType.ERROR);
+            connection_error.setTitle("Database Connection Error");
+            connection_error.setHeaderText("Check your connection.");
+            connection_error.setContentText(e.toString());
+            connection_error.showAndWait();
+            System.exit(0);
         }
     }
 
@@ -190,7 +199,12 @@ public class VerifyPaymentsControl {
             }
             get_program_code.close();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            Alert connection_error = new Alert(Alert.AlertType.ERROR);
+            connection_error.setTitle("Database Connection Error");
+            connection_error.setHeaderText("Check your connection.");
+            connection_error.setContentText(e.toString());
+            connection_error.showAndWait();
+            System.exit(0);
         }
         program_code_combobox.setItems(block_list);
         program_code_combobox.getSelectionModel().selectFirst();
@@ -229,13 +243,17 @@ public class VerifyPaymentsControl {
                     String status = result.getString("status");
                     long transaction_id = result.getLong("transaction_id");
 
-                    unverified_list.add(new UnverifiedPayment(id_number, first_name, middle_name, last_name,
-                            suffix_name, status, transaction_id));
+                    unverified_list.add(new UnverifiedPayment(id_number, first_name, middle_name, last_name, suffix_name, status, transaction_id));
                 }
                 setupData(unverified_list);
                 get_unverified_payments.close();
             } catch (SQLException e) {
-                throw new RuntimeException(e);
+                Alert connection_error = new Alert(Alert.AlertType.ERROR);
+                connection_error.setTitle("Database Connection Error");
+                connection_error.setHeaderText("Check your connection.");
+                connection_error.setContentText(e.toString());
+                connection_error.showAndWait();
+                System.exit(0);
             }
         } else {
             Border error_border = new Border(new BorderStroke(Color.RED, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT));
@@ -272,13 +290,17 @@ public class VerifyPaymentsControl {
                 String status = result.getString("status");
                 long transaction_id = result.getLong("transaction_id");
 
-                payer_with_id_list.add(new UnverifiedPayment(id_number, first_name, middle_name, last_name,
-                        suffix_name, status, transaction_id));
+                payer_with_id_list.add(new UnverifiedPayment(id_number, first_name, middle_name, last_name, suffix_name, status, transaction_id));
             }
             setupData(payer_with_id_list);
             get_student_id.close();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            Alert connection_error = new Alert(Alert.AlertType.ERROR);
+            connection_error.setTitle("Database Connection Error");
+            connection_error.setHeaderText("Check your connection.");
+            connection_error.setContentText(e.toString());
+            connection_error.showAndWait();
+            System.exit(0);
         }
     }
 
@@ -305,8 +327,7 @@ public class VerifyPaymentsControl {
                 transaction_stage.getIcons().add(new Image(new File("src/src/app-logo.jpg").toURI().toString()));
                 transaction_stage.setResizable(false);
                 transaction_stage.initModality(Modality.APPLICATION_MODAL);
-                FXMLLoader verify_form_loader = new FXMLLoader(
-                        Main.class.getResource("BUFICOM-FRAMES/verify-transaction-form.fxml"));
+                FXMLLoader verify_form_loader = new FXMLLoader(Main.class.getResource("BUFICOM-FRAMES/verify-transaction-form.fxml"));
                 Parent transaction_parent = verify_form_loader.load();
                 VerifyTransactionControl transaction_process = verify_form_loader.getController();
                 transaction_process.initialize(payment);

@@ -135,8 +135,7 @@ public class BuficomInfoControl {
         parent.getChildren().remove(children.get(1));
         try {
             // load and add the scene to the parent to be displayed
-            FXMLLoader dashboard_loader = new FXMLLoader(
-                    Main.class.getResource("BUFICOM-FRAMES/transaction-history.fxml"));
+            FXMLLoader dashboard_loader = new FXMLLoader(Main.class.getResource("BUFICOM-FRAMES/transaction-history.fxml"));
             AnchorPane dashboard = dashboard_loader.load();
             TransactionHistoryControl dashboard_control = dashboard_loader.getController();
             dashboard_control.initialize(org_code_textfield.getText());
@@ -185,8 +184,7 @@ public class BuficomInfoControl {
             edit_contribution_stage.initModality(Modality.APPLICATION_MODAL);
 
             // load the display
-            FXMLLoader edit_contribution_loader = new FXMLLoader(
-                    Main.class.getResource("BUFICOM-FRAMES/edit-contribution-form.fxml"));
+            FXMLLoader edit_contribution_loader = new FXMLLoader(Main.class.getResource("BUFICOM-FRAMES/edit-contribution-form.fxml"));
             Parent edit_contribution_parent = edit_contribution_loader.load();
             EditContributionControl edit_contribution_control = edit_contribution_loader.getController();
             edit_contribution_control.initialize(org_code_textfield.getText());
@@ -217,7 +215,12 @@ public class BuficomInfoControl {
             }
             get_org_code.close();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            Alert connection_error = new Alert(Alert.AlertType.ERROR);
+            connection_error.setTitle("Database Connection Error");
+            connection_error.setHeaderText("Check your connection.");
+            connection_error.setContentText(e.toString());
+            connection_error.showAndWait();
+            System.exit(0);
         }
     }
 

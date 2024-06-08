@@ -114,7 +114,12 @@ public class ChangePasswordControl {
                     }
                 });
             } catch (SQLException e) {
-                throw new RuntimeException(e);
+                Alert connection_error = new Alert(Alert.AlertType.ERROR);
+                connection_error.setTitle("Database Connection Error");
+                connection_error.setHeaderText("Check your connection.");
+                connection_error.setContentText(e.toString());
+                connection_error.showAndWait();
+                System.exit(0);
             }
         } else {
             Border error_border = new Border(new BorderStroke(Color.RED, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT));

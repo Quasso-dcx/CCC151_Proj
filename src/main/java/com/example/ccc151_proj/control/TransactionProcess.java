@@ -99,7 +99,12 @@ public class TransactionProcess {
             transaction_amount.setText(amount);
             get_amount.close();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            Alert connection_error = new Alert(Alert.AlertType.ERROR);
+            connection_error.setTitle("Database Connection Error");
+            connection_error.setHeaderText("Check your connection.");
+            connection_error.setContentText(e.toString());
+            connection_error.showAndWait();
+            System.exit(0);
         }
 
         // add the modes of payment
@@ -172,7 +177,12 @@ public class TransactionProcess {
                         + "Please wait for verification from the BUFICOM Officers. Thank you.");
                 success_transaction.showAndWait();
             } catch (SQLException e) {
-                throw new RuntimeException(e);
+                Alert connection_error = new Alert(Alert.AlertType.ERROR);
+                connection_error.setTitle("Database Connection Error");
+                connection_error.setHeaderText("Check your connection.");
+                connection_error.setContentText(e.toString());
+                connection_error.showAndWait();
+                System.exit(0);
             }
 
             if (semester.equals("1"))

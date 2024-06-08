@@ -211,7 +211,12 @@ public class ClassRepControl {
             paid_students2.setText(student_paid_2_count + " out of " + student_total_count);
             money_collected2.setText("Php " + student_paid_2_count*contribution_data_table.getItems().get(1).getContribution_amount());
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            Alert connection_error = new Alert(Alert.AlertType.ERROR);
+            connection_error.setTitle("Database Connection Error");
+            connection_error.setHeaderText("Check your connection.");
+            connection_error.setContentText(e.toString());
+            connection_error.showAndWait();
+            System.exit(0);
         }
     }
 
@@ -263,7 +268,12 @@ public class ClassRepControl {
 
             setup_user_data.close();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            Alert connection_error = new Alert(Alert.AlertType.ERROR);
+            connection_error.setTitle("Database Connection Error");
+            connection_error.setHeaderText("Check your connection.");
+            connection_error.setContentText(e.toString());
+            connection_error.showAndWait();
+            System.exit(0);
         }
     }
 
@@ -291,7 +301,12 @@ public class ClassRepControl {
             }
             get_contributions_data.close();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            Alert connection_error = new Alert(Alert.AlertType.ERROR);
+            connection_error.setTitle("Database Connection Error");
+            connection_error.setHeaderText("Check your connection.");
+            connection_error.setContentText(e.toString());
+            connection_error.showAndWait();
+            System.exit(0);
         }
         return contributions_list;
     }
@@ -400,6 +415,12 @@ public class ClassRepControl {
             }
             get_members_data.close();
         } catch (SQLException e) {
+            Alert connection_error = new Alert(Alert.AlertType.ERROR);
+            connection_error.setTitle("Database Connection Error");
+            connection_error.setHeaderText("Check your connection.");
+            connection_error.setContentText(e.toString());
+            connection_error.showAndWait();
+            System.exit(0);
             throw new RuntimeException(e);
         }
         return member_list;
@@ -413,7 +434,7 @@ public class ClassRepControl {
      * @return status of the student
      * @throws SQLException
      */
-    private String getPayerStatus(ContributionProperties contribution, String id_number) throws SQLException {
+    private String getPayerStatus(ContributionProperties contribution, String id_number) {
         /*
          * Set the initial status to Not Paid in case there are no data to be fetched
          * since there was no transaction made still
@@ -422,21 +443,30 @@ public class ClassRepControl {
         if (contribution.getContribution_amount() <= 0) {
             status = "Paid"; // if there is no contribution to be paid
         } else {
-            // get their status for first sem
-            String payment_status_query = "SELECT `status` "
-                    + "FROM `pays` "
-                    + "WHERE `payer_id` = '" + id_number + "' "
-                    + "AND `contribution_code` = '" + contribution.getContribution_code() + "' "
-                    + "ORDER BY `transaction_id` DESC;";
-            PreparedStatement get_payment_status = connect.prepareStatement(payment_status_query);
-            ResultSet result = get_payment_status.executeQuery();
-            if (result.next()) {
-                status = switch (result.getString("status")) {
-                    case "Accepted" -> "Paid";
-                    default -> result.getString("status");
-                };
+            try {
+                // get their status for first sem
+                String payment_status_query = "SELECT `status` "
+                        + "FROM `pays` "
+                        + "WHERE `payer_id` = '" + id_number + "' "
+                        + "AND `contribution_code` = '" + contribution.getContribution_code() + "' "
+                        + "ORDER BY `transaction_id` DESC;";
+                PreparedStatement get_payment_status = connect.prepareStatement(payment_status_query);
+                ResultSet result = get_payment_status.executeQuery();
+                if (result.next()) {
+                    status = switch (result.getString("status")) {
+                        case "Accepted" -> "Paid";
+                        default -> result.getString("status");
+                    };
+                }
+                result.close();
+            } catch (SQLException e) {
+                Alert connection_error = new Alert(Alert.AlertType.ERROR);
+                connection_error.setTitle("Database Connection Error");
+                connection_error.setHeaderText("Check your connection.");
+                connection_error.setContentText(e.toString());
+                connection_error.showAndWait();
+                System.exit(0);
             }
-            result.close();
         }
         return status;
     }
@@ -584,6 +614,7 @@ public class ClassRepControl {
         Scene transaction_scene = new Scene(transaction_parent);
         transaction_stage.setTitle("Contribution Payment Transaction");
         transaction_stage.setScene(transaction_scene);
+        transaction_stage.setResizable(false);
         transaction_stage.show();
     }
 
@@ -607,6 +638,7 @@ public class ClassRepControl {
             Scene transaction_scene = new Scene(transaction_parent);
             transaction_stage.setTitle("View Transaction");
             transaction_stage.setScene(transaction_scene);
+            transaction_stage.setResizable(false);
             transaction_stage.show();
         } else {
             Alert non_selected = new Alert(Alert.AlertType.INFORMATION);

@@ -21,6 +21,9 @@ import javafx.stage.Stage;
 
 import java.io.*;
 import java.sql.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Calendar;
 import java.util.Optional;
 
 /**
@@ -104,7 +107,12 @@ public class VerifyTransactionControl {
             }
             get_payment_info.close();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            Alert connection_error = new Alert(Alert.AlertType.ERROR);
+            connection_error.setTitle("Database Connection Error");
+            connection_error.setHeaderText("Check your connection.");
+            connection_error.setContentText(e.toString());
+            connection_error.showAndWait();
+            System.exit(0);
         }
     }
 
@@ -139,8 +147,13 @@ public class VerifyTransactionControl {
             receipt_stage.setTitle("Payment Receipt.");
             receipt_stage.setScene(scene);
             receipt_stage.show();
-        } catch (SQLException ex) {
-            throw new RuntimeException(ex);
+        } catch (SQLException e) {
+            Alert connection_error = new Alert(Alert.AlertType.ERROR);
+            connection_error.setTitle("Database Connection Error");
+            connection_error.setHeaderText("Check your connection.");
+            connection_error.setContentText(e.toString());
+            connection_error.showAndWait();
+            System.exit(0);
         }
     }
 
@@ -175,7 +188,12 @@ public class VerifyTransactionControl {
                 // notify the payer via email
                 notifyPayer("Thank you for paying.", "Accepted");
             } catch (SQLException e) {
-                throw new RuntimeException(e);
+                Alert connection_error = new Alert(Alert.AlertType.ERROR);
+                connection_error.setTitle("Database Connection Error");
+                connection_error.setHeaderText("Check your connection.");
+                connection_error.setContentText(e.toString());
+                connection_error.showAndWait();
+                System.exit(0);
             }
             ((Stage) ((Node) event.getSource()).getScene().getWindow()).close();    // close the frame
         }
@@ -215,7 +233,12 @@ public class VerifyTransactionControl {
                             + transaction_label.getText().replace(" Contribution", "").split("_")[0]
                             + " for clarification. Thank you.", "Rejected");
                 } catch (SQLException e) {
-                    throw new RuntimeException(e);
+                    Alert connection_error = new Alert(Alert.AlertType.ERROR);
+                    connection_error.setTitle("Database Connection Error");
+                    connection_error.setHeaderText("Check your connection.");
+                    connection_error.setContentText(e.toString());
+                    connection_error.showAndWait();
+                    System.exit(0);
                 }
                 ((Stage) ((Node) event.getSource()).getScene().getWindow()).close();    // close the frame
             }
@@ -259,6 +282,10 @@ public class VerifyTransactionControl {
                 FileOutputStream outputStream = new FileOutputStream(file);
                 outputStream.write(receipt_image.getBinaryStream().readAllBytes());
             }
+
+            // get the current date and time when the payment is verified
+            DateTimeFormatter date_time = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+            LocalDateTime now = LocalDateTime.now();
 
             String message_to_student = "<html lang=\"en\">\n" +
                     "<head>\n" +
@@ -331,6 +358,10 @@ public class VerifyTransactionControl {
                     "        <td>Comments</td>\n" +
                     "        <td>" + transaction_comments.getText() + "</td>\n" +
                     "    </tr>\n" +
+                    "    <tr>\n" +
+                    "        <td>Verified</td>\n" +
+                    "        <td>" + date_time.format(now) + "</td>\n" +
+                    "    </tr>" +
                     "</table>\n" +
                     "\n" +
                     "<p class=\"remarks\">" + end_message + "</p>\n" +
@@ -345,6 +376,12 @@ public class VerifyTransactionControl {
             Thread sender_thread = new Thread(sender);
             sender_thread.start();
         } catch (IOException | SQLException e){
+            Alert connection_error = new Alert(Alert.AlertType.ERROR);
+            connection_error.setTitle("Database Connection Error");
+            connection_error.setHeaderText("Check your connection.");
+            connection_error.setContentText(e.toString());
+            connection_error.showAndWait();
+            System.exit(0);
             throw new RuntimeException(e);
         }
     }

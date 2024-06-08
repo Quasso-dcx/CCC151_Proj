@@ -112,7 +112,12 @@ public class ReviewTransactionControl {
 
             get_payment_info.close();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            Alert connection_error = new Alert(Alert.AlertType.ERROR);
+            connection_error.setTitle("Database Connection Error");
+            connection_error.setHeaderText("Check your connection.");
+            connection_error.setContentText(e.toString());
+            connection_error.showAndWait();
+            System.exit(0);
         }
     }
 
@@ -149,8 +154,13 @@ public class ReviewTransactionControl {
             receipt_stage.getIcons().add(new Image(new File("src/src/app-logo.jpg").toURI().toString()));
             receipt_stage.setResizable(false);
             receipt_stage.show();
-        } catch (SQLException ex) {
-            throw new RuntimeException(ex);
+        } catch (SQLException e) {
+            Alert connection_error = new Alert(Alert.AlertType.ERROR);
+            connection_error.setTitle("Database Connection Error");
+            connection_error.setHeaderText("Check your connection.");
+            connection_error.setContentText(e.toString());
+            connection_error.showAndWait();
+            System.exit(0);
         }
     }
 

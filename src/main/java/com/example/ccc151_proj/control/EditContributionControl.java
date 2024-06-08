@@ -82,7 +82,12 @@ public class EditContributionControl {
             result.close();
             setupContributionData(contribution_list);
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            Alert connection_error = new Alert(Alert.AlertType.ERROR);
+            connection_error.setTitle("Database Connection Error");
+            connection_error.setHeaderText("Check your connection.");
+            connection_error.setContentText(e.toString());
+            connection_error.showAndWait();
+            System.exit(0);
         }
     }
 
@@ -151,7 +156,12 @@ public class EditContributionControl {
                         edit_contribution.setString(3, contribution_data_table.getSelectionModel().getSelectedItem().getContribution_code());
                         edit_contribution.executeUpdate();
                     } catch (SQLException e) {
-                        throw new RuntimeException(e);
+                        Alert connection_error = new Alert(Alert.AlertType.ERROR);
+                        connection_error.setTitle("Database Connection Error");
+                        connection_error.setHeaderText("Check your connection.");
+                        connection_error.setContentText(e.toString());
+                        connection_error.showAndWait();
+                        System.exit(0);
                     }
                     initialize(this.org_code);
                     clear_selection_button_clicked();

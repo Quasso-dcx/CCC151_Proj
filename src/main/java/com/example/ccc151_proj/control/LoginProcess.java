@@ -140,8 +140,7 @@ public class LoginProcess implements Initializable {
 
                     Stage change_pass_stage = new Stage();
                     // initialize the loader for the change password form
-                    FXMLLoader change_pass_loader = new FXMLLoader(
-                            Main.class.getResource("change-password.fxml"));
+                    FXMLLoader change_pass_loader = new FXMLLoader(Main.class.getResource("change-password.fxml"));
                     Parent change_pass_parent = change_pass_loader.load();
                     // initialize the controller
                     ChangePasswordControl change_pass_control = change_pass_loader.getController();
@@ -150,6 +149,7 @@ public class LoginProcess implements Initializable {
                     // create the scene
                     Scene change_pass_scene = new Scene(change_pass_parent);
                     change_pass_stage.setScene(change_pass_scene);
+                    change_pass_stage.setResizable(false);
                     change_pass_stage.show();
                 } catch (IOException e) {
                     throw new RuntimeException(e);
@@ -216,10 +216,8 @@ public class LoginProcess implements Initializable {
             } else {
                 // set up the initial scene for the BUFICOM
                 // initialize the loader
-                FXMLLoader buficom_info_loader = new FXMLLoader(
-                        Main.class.getResource("BUFICOM-FRAMES/buficom-info.fxml"));
-                FXMLLoader dashboard_loader = new FXMLLoader(
-                        Main.class.getResource("BUFICOM-FRAMES/verify-payments.fxml"));
+                FXMLLoader buficom_info_loader = new FXMLLoader(Main.class.getResource("BUFICOM-FRAMES/buficom-info.fxml"));
+                FXMLLoader dashboard_loader = new FXMLLoader(Main.class.getResource("BUFICOM-FRAMES/verify-payments.fxml"));
 
                 // load the panes
                 AnchorPane info = buficom_info_loader.load();
@@ -267,7 +265,13 @@ public class LoginProcess implements Initializable {
             else return false; // if the user isn't listed
             get_user_info.close();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            Alert connection_error = new Alert(Alert.AlertType.ERROR);
+            connection_error.setTitle("Database Connection Error");
+            connection_error.setHeaderText("Check your connection.");
+            connection_error.setContentText(e.toString());
+            connection_error.showAndWait();
+            System.exit(0);
+            return false;
         }
 
         if (id_number.equals(recorded_pass)) return recorded_pass.equals(password); // if the password wasn't changed
@@ -290,7 +294,12 @@ public class LoginProcess implements Initializable {
             if (result.next()) user_position = result.getString("position");
             check_user_position.close();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            Alert connection_error = new Alert(Alert.AlertType.ERROR);
+            connection_error.setTitle("Database Connection Error");
+            connection_error.setHeaderText("Check your connection.");
+            connection_error.setContentText(e.toString());
+            connection_error.showAndWait();
+            System.exit(0);
         }
         return user_position;
     }
